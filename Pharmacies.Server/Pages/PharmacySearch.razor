@@ -1,0 +1,134 @@
+﻿@page "/pharmacySearch"
+
+@using Pharmacies.Data.Services
+@using Pharmacies.Data.Interfaces
+@using Pharmacies.Data.Models
+@using Pharmacies.Server.Controls
+@using System.Linq
+
+@inject IJSRuntime JSRuntime
+@inject IPharmacyService PharmacyService
+
+
+<link rel="stylesheet" href="css/PharmacySearch.css" />
+
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="search">
+
+                <label>Search</label>
+                <div class="input-group mb-3">
+                    <input @bind="@_address" @oninput="(EventArgs) => { SetAddress(EventArgs.Value.ToString()); }" type="text" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2">
+                    <button @onclick="GetObj" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                </div>
+
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col">
+            <div class="pharmacies">
+                @if (_pharmacies != null)
+                {
+                    @foreach (var pharmacy in _pharmacies.results)
+                    {
+                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id"></PharmacyCard>
+                    }
+
+                }
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="map" id="map" style="height:500px;width:100%;">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    private string _address;
+    private Location _location;
+    public Rootobject _pharmacies;
+    private int _range = 2000;
+
+    public GoogleMapPosition Position = new GoogleMapPosition { Lat = 49.85059889999999, Lng = 19.0871336 };
+
+    private void SetAddress(string value)
+    {
+        _address = value;
+    }
+
+
+
+
+    private async Task GetLocation()
+    {
+        _location = await PharmacyService.GetSearchedLocation(_address);
+        _pharmacies = await PharmacyService.SearchPharmacies(_location, _range);
+
+
+    }
+
+    private void GetObj()
+    {
+        _pharmacies = PharmacyService.GetObj();
+
+        AddMarkers();
+    }
+
+
+
+
+    public void SetLocation(string placeId)
+    {
+        var place = _pharmacies.results.Where(x => x.place_id == placeId).FirstOrDefault();
+        Position = new GoogleMapPosition { Lat = place.geometry.location.lat, Lng = place.geometry.location.lng };
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var location = await JSRuntime.InvokeAsync<float[]>("initialize", null);
+        }
+
+
+    }
+
+
+
+
+
+    public async void AddMarkers()
+    {
+        _pharmacies = PharmacyService.GetObj();
+
+        Location[] locations = new Location[_pharmacies.results.Length];
+        for (int i = 0; i < _pharmacies.results.Length; i++)
+        {
+            locations[i] = _pharmacies.results[i].geometry.location;
+        }
+
+        await JSRuntime.InvokeVoidAsync("AddMarkers", locations);
+    }
+
+
+
+
+
+}
+
+
+
+
+
+
+
