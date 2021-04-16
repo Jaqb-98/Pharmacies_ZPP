@@ -13,6 +13,8 @@
 <link rel="stylesheet" href="css/PharmacySearch.css" />
 
 
+
+
 <div class="container">
     <div class="row">
         <div class="col">
@@ -20,8 +22,8 @@
 
                 <label>Search</label>
                 <div class="input-group mb-3">
-                    <input @bind="@_address" @oninput="(EventArgs) => { SetAddress(EventArgs.Value.ToString()); }" type="text" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2">
-                    <button @onclick="GetObj" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                    <input @bind="@_address" @oninput="(e) => { _address=e.Value.ToString(); Autocomplete(); }" type="text" id="autocomplete" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2">
+                    <button @onclick="GetLocation" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
                 </div>
 
             </div>
@@ -38,7 +40,7 @@
                 {
                     @foreach (var pharmacy in _pharmacies.results)
                     {
-                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id"></PharmacyCard>
+                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" Location="@pharmacy.geometry.location" OnClickCallback="ShowOnMap"></PharmacyCard>
                     }
 
                 }
@@ -54,26 +56,28 @@
 
 
 @code {
-    private string _address;
+    private string _address { get; set; }
     private Location _location;
     public Rootobject _pharmacies;
     private int _range = 2000;
-
-    public GoogleMapPosition Position = new GoogleMapPosition { Lat = 49.85059889999999, Lng = 19.0871336 };
-
-    private void SetAddress(string value)
-    {
-        _address = value;
-    }
-
+    public int zoom = 14;
 
 
 
     private async Task GetLocation()
     {
+        _address = await JSRuntime.InvokeAsync<string>("SetAddress");
         _location = await PharmacyService.GetSearchedLocation(_address);
         _pharmacies = await PharmacyService.SearchPharmacies(_location, _range);
 
+        var coords = new List<Location>();
+
+        foreach (var item in _pharmacies.results)
+        {
+            coords.Add(item.geometry.location);
+        }
+
+        await JSRuntime.InvokeVoidAsync("SetLocationAndMarkers", _location.lat, _location.lng, zoom, coords);
 
     }
 
@@ -81,7 +85,6 @@
     {
         _pharmacies = PharmacyService.GetObj();
 
-        AddMarkers();
     }
 
 
@@ -90,34 +93,29 @@
     public void SetLocation(string placeId)
     {
         var place = _pharmacies.results.Where(x => x.place_id == placeId).FirstOrDefault();
-        Position = new GoogleMapPosition { Lat = place.geometry.location.lat, Lng = place.geometry.location.lng };
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            var location = await JSRuntime.InvokeAsync<float[]>("initialize", null);
+            await JSRuntime.InvokeVoidAsync("initialize", null);
         }
-
-
     }
 
 
 
 
 
-    public async void AddMarkers()
+    public async void ShowOnMap(Location location)
     {
-        _pharmacies = PharmacyService.GetObj();
+        await JSRuntime.InvokeVoidAsync("CenterOnLocation",location);
+     
+    }
 
-        Location[] locations = new Location[_pharmacies.results.Length];
-        for (int i = 0; i < _pharmacies.results.Length; i++)
-        {
-            locations[i] = _pharmacies.results[i].geometry.location;
-        }
-
-        await JSRuntime.InvokeVoidAsync("AddMarkers", locations);
+    public async Task Autocomplete()
+    {
+        await JSRuntime.InvokeVoidAsync("initAutocomplete");
     }
 
 
@@ -125,6 +123,8 @@
 
 
 }
+
+
 
 
 
