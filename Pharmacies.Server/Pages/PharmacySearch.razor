@@ -6,6 +6,10 @@
 @using Pharmacies.Server.Controls
 @using System.Linq
 
+@using GoogleMapsComponents
+@using GoogleMapsComponents.Maps
+
+
 @inject IJSRuntime JSRuntime
 @inject IPharmacyService PharmacyService
 
@@ -40,15 +44,14 @@
                 {
                     @foreach (var pharmacy in _pharmacies.results)
                     {
-                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" Location="@pharmacy.geometry.location" OnClickCallback="ShowOnMap"></PharmacyCard>
+                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" Location="@pharmacy.geometry.location" ></PharmacyCard>
                     }
 
                 }
             </div>
         </div>
         <div class="col-8">
-            <div class="map" id="map" style="height:500px;width:100%;">
-            </div>
+            <GoogleMap @ref="@map" Id="map" Options="@mapOptions"></GoogleMap>
         </div>
     </div>
 </div>
@@ -56,6 +59,9 @@
 
 
 @code {
+    private GoogleMap map;
+    private MapOptions mapOptions;
+
     private string _address { get; set; }
     private Location _location;
     public Rootobject _pharmacies;
@@ -103,15 +109,29 @@
         }
     }
 
-
-
-
-
-    public async void ShowOnMap(Location location)
+    protected override void OnInitialized()
     {
-        await JSRuntime.InvokeVoidAsync("CenterOnLocation",location);
-     
+        
+        mapOptions = new MapOptions()
+        {
+            Zoom = 13,
+            Center = new LatLngLiteral()
+            {
+                Lat = 13.505892,
+                Lng = 100.8162
+            },
+            MapTypeId = MapTypeId.Roadmap
+
+        };
+
+
     }
+
+
+
+
+
+
 
     public async Task Autocomplete()
     {
