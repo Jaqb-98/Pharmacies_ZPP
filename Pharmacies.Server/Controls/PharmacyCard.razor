@@ -1,0 +1,36 @@
+﻿@using Pharmacies.Data.Models
+
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+        <h5 class="card-title">@Name</h5>
+        <h6 class="card-subtitle mb-2 text-muted">@Vicinity</h6>
+        <p class="card-text"></p>
+        <a class="card-link" @onclick="@(()=>OnClickCallback.InvokeAsync(Location))">Show on map</a>
+        <a class="card-link" @onclick="@(()=>ShowDirections.InvokeAsync(Location))">Show directions</a>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; }
+
+    [Parameter]
+    public string Vicinity { get; set; }
+
+    [Parameter]
+    public string PlaceId { get; set; }
+
+    [Parameter]
+    public Location Location { get; set; }
+
+    [Parameter]
+    public RenderFragment Control { get; set; }
+
+    [Parameter]
+    public EventCallback<Location> OnClickCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<Location> ShowDirections { get; set; }
+
+}
