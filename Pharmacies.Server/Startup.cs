@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -5,7 +6,9 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Pharmacies.Server.Data;
+using Pharmacies.Data;
+using Pharmacies.Data.Interfaces;
+using Pharmacies.Data.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +32,10 @@ namespace Pharmacies.Server
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+            services.AddScoped<IPharmacyService, PharmacyService>();
+            services.AddSingleton(Configuration);
+            //services.AddSingleton<LocationService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
