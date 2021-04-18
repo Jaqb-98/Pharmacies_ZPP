@@ -7,7 +7,66 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-grid.css" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-grid.css.map" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css.map" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-reboot.css" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-reboot.css.map" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-reboot.min.css" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap-reboot.min.css.map" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap.css" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap.css.map" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap.min.css" />
+    <Content Remove="C:\Users\Jaqb\.nuget\packages\bootstrap\4.6.0\contentFiles\any\any\wwwroot\css\bootstrap.min.css.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BlazorGoogleMaps" Version="1.0.14" />
+    <PackageReference Include="bootstrap" Version="4.6.0" />
+    <PackageReference Include="BrowserInterop" Version="1.1.2" />
+    <PackageReference Include="Darnton.Blazor.DeviceInterop" Version="0.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+    <PackageReference Include="Radzen.Blazor" Version="3.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-grid.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-grid.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-grid.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-grid.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-reboot.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-reboot.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-reboot.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-reboot.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-utilities.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-utilities.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-utilities.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap-utilities.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap.rtl.css.map" />
+    <None Include="wwwroot\css\bootstrap\css\bootstrap.rtl.min.css.map" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.bundle.js" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.bundle.js.map" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.bundle.min.js" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.bundle.min.js.map" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.esm.js" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.esm.js.map" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.esm.min.js" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.esm.min.js.map" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.js" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.js.map" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.min.js" />
+    <None Include="wwwroot\css\bootstrap\js\bootstrap.min.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pharmacies.Data\Pharmacies.Data.csproj" />
   </ItemGroup>
 
 </Project>
