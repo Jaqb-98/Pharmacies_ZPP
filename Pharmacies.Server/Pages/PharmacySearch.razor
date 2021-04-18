@@ -8,10 +8,16 @@
 
 @using GoogleMapsComponents
 @using GoogleMapsComponents.Maps
+@using GoogleMapsComponents.Maps.Places
+@using GoogleMapsComponents.Maps.Coordinates
+
+@using BrowserInterop.Extensions
+@using BrowserInterop.Geolocation
 
 
 @inject IJSRuntime JSRuntime
 @inject IPharmacyService PharmacyService
+
 
 
 <link rel="stylesheet" href="css/PharmacySearch.css" />
@@ -24,15 +30,22 @@
         <div class="col">
             <div class="search">
 
-                <label>Search</label>
+               @*<label>Search</label>*@
                 <div class="input-group mb-3">
-                    <input @bind="@_address" @oninput="(e) => { _address=e.Value.ToString(); Autocomplete(); }" type="text" id="autocomplete" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2">
+                    <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
                     <button @onclick="GetLocation" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
                 </div>
 
             </div>
         </div>
-        <div class="col"></div>
+        <div class="col">
+            <select @bind="@_range" class="form-select" aria-label="Default select example">
+                <option selected>Search range</option>
+                <option value="2000">2km</option>
+                <option value="5000">5km</option>
+                <option value="10000">10km</option>
+            </select>
+        </div>
     </div>
 
 
@@ -44,14 +57,15 @@
                 {
                     @foreach (var pharmacy in _pharmacies.results)
                     {
-                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" Location="@pharmacy.geometry.location" ></PharmacyCard>
+                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" Location="@pharmacy.geometry.location" OnClickCallback="CenterMarker" ShowDirections="AddDirections"></PharmacyCard>
                     }
 
                 }
             </div>
         </div>
         <div class="col-8">
-            <GoogleMap @ref="@map" Id="map" Options="@mapOptions"></GoogleMap>
+            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()"></GoogleMap>
+
         </div>
     </div>
 </div>
@@ -59,8 +73,16 @@
 
 
 @code {
-    private GoogleMap map;
+    private GoogleMap map1;
     private MapOptions mapOptions;
+    private Autocomplete autocomplete;
+
+    private readonly Stack<Marker> markers = new Stack<Marker>();
+    private MarkerClustering _markerClustering;
+
+    private string message;
+
+    private ElementReference searchBox;
 
     private string _address { get; set; }
     private Location _location;
@@ -69,22 +91,73 @@
     public int zoom = 14;
 
 
+    private WindowNavigatorGeolocation geolocation;
+    private GeolocationPosition geolocationPosition;
+
+
+    private PlaceResult searchedPlace;
+
+    //direcrions
+    private DirectionsRenderer dirRend;
+    private string _durationTotalString;
+    private string _distanceTotalString;
+    private DirectionsResult _directionsResult;
+
+
 
     private async Task GetLocation()
     {
-        _address = await JSRuntime.InvokeAsync<string>("SetAddress");
-        _location = await PharmacyService.GetSearchedLocation(_address);
-        _pharmacies = await PharmacyService.SearchPharmacies(_location, _range);
+        //_address = await JSRuntime.InvokeAsync<string>("SetAddress");
+        // _location = await PharmacyService.GetSearchedLocation(_address);
+        _pharmacies = await PharmacyService.SearchPharmacies(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
 
-        var coords = new List<Location>();
+        var coords = new List<LatLngLiteral>();
 
         foreach (var item in _pharmacies.results)
         {
-            coords.Add(item.geometry.location);
+            coords.Add(new LatLngLiteral { Lat = item.geometry.location.lat, Lng = item.geometry.location.lng });
         }
+        if (_markerClustering != null)
+            await ClearClustering();
 
-        await JSRuntime.InvokeVoidAsync("SetLocationAndMarkers", _location.lat, _location.lng, zoom, coords);
+        await InvokeClustering(coords);
+        //await JSRuntime.InvokeVoidAsync("SetLocationAndMarkers", _location.lat, _location.lng, zoom, coords);
 
+    }
+
+    private async Task InvokeClustering(List<LatLngLiteral> coords)
+    {
+        var markers = await GetMarkers(coords, map1.InteropObject);
+
+        _markerClustering = await MarkerClustering.CreateAsync(map1.JsRuntime, map1.InteropObject, markers);
+        await _markerClustering.FitMapToMarkers(1);
+    }
+
+    private async Task ClearClustering()
+    {
+        await _markerClustering.ClearMarkers();
+    }
+
+    private async Task<IEnumerable<Marker>> GetMarkers(IEnumerable<LatLngLiteral> coords, Map map)
+    {
+        var result = new List<Marker>(coords.Count());
+        foreach (var latLngLiteral in coords)
+        {
+            var marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
+            {
+                Position = latLngLiteral,
+                Map = map,
+
+            });
+
+            result.Add(marker);
+        }
+        return result;
+    }
+
+    private async Task CenterMarker(Location markerLocation)
+    {
+        await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = markerLocation.lat, Lng = markerLocation.lng });
     }
 
     private void GetObj()
@@ -95,51 +168,145 @@
 
 
 
-
-    public void SetLocation(string placeId)
+    protected override async Task OnInitializedAsync()
     {
-        var place = _pharmacies.results.Where(x => x.place_id == placeId).FirstOrDefault();
+
+        var window = await JSRuntime.Window();
+        var navigator = await window.Navigator();
+
+        geolocation = navigator.Geolocation;
+
+        await GetUserLocation();
+
+        await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = geolocationPosition.Coords.Latitude, Lng = geolocationPosition.Coords.Longitude });
+        await this.map1.InteropObject.SetZoom(zoom);
+
+        dirRend = await DirectionsRenderer.CreateAsync(map1.JsRuntime, new DirectionsRendererOptions()
+        {
+            Map = map1.InteropObject
+        });
+
+        this.StateHasChanged();
+
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+
+
+    public async Task GetUserLocation()
     {
-        if (firstRender)
+        geolocationPosition = (await geolocation.GetCurrentPosition(new PositionOptions()
         {
-            await JSRuntime.InvokeVoidAsync("initialize", null);
-        }
+            EnableHighAccuracy = true,
+            MaximumAgeTimeSpan = TimeSpan.FromHours(1),
+            TimeoutTimeSpan = TimeSpan.FromMinutes(1)
+        })).Location;
+
     }
 
-    protected override void OnInitialized()
+
+
+
+    private async Task OnAfterMapInit()
     {
-        
-        mapOptions = new MapOptions()
+
+
+        this.autocomplete = await Autocomplete.CreateAsync(this.map1.JsRuntime, this.searchBox, new AutocompleteOptions
         {
-            Zoom = 13,
-            Center = new LatLngLiteral()
+            StrictBounds = false,
+            ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } }
+        });
+
+        await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name" });
+
+        await this.autocomplete.AddListener("place_changed", async () =>
+        {
+            var place = await this.autocomplete.GetPlace();
+            searchedPlace = place;
+            if (place?.Geometry == null)
             {
-                Lat = 13.505892,
-                Lng = 100.8162
-            },
-            MapTypeId = MapTypeId.Roadmap
+                this.message = "No results available for " + place?.Name;
+            }
+            else if (place.Geometry.Location != null)
+            {
+                await this.map1.InteropObject.SetCenter(place.Geometry.Location);
+                await this.map1.InteropObject.SetZoom(13);
 
+                //var marker = await Marker.CreateAsync(this.map1.JsRuntime, new MarkerOptions
+                //{
+                //    Position = place.Geometry.Location,
+                //    Map = this.map1.InteropObject,
+                //    Title = place.Name
+                //});
+
+                //this.markers.Push(marker);
+
+                this.message = "Displaying result for " + place.Name;
+            }
+            else if (place.Geometry.Viewport != null)
+            {
+                await this.map1.InteropObject.FitBounds(place.Geometry.Viewport, 5);
+                this.message = "Displaying result for " + place.Name;
+            }
+
+            this.StateHasChanged();
+        });
+    }
+
+
+
+    //directions
+
+    private async Task RemoveRoute()
+    {
+        await dirRend.SetDirections(null);
+        await dirRend.SetMap(null);
+    }
+
+    private async Task OnAfterInitAsync()
+    {
+        //Create instance of DirectionRenderer
+        dirRend = await DirectionsRenderer.CreateAsync(map1.JsRuntime, new DirectionsRendererOptions()
+        {
+            Map = map1.InteropObject
+        });
+    }
+
+
+    private async Task AddDirections(Location location)
+    {
+        //Adding a waypoint
+        // var waypoints = new List<DirectionsWaypoint>();
+
+        //Direction Request
+        DirectionsRequest dr = new DirectionsRequest();
+        dr.Origin = searchedPlace.Geometry.Location;
+        dr.Destination = new LatLngLiteral { Lat = location.lat, Lng = location.lng };
+        //dr.Waypoints = waypoints;
+        dr.TravelMode = TravelMode.Driving;
+        dr.DrivingOptions = new DrivingOptions()
+        {
+            DepartureTime = DateTime.Now.AddHours(1)
         };
 
+        //Calculate Route
+        _directionsResult = await dirRend.Route(dr, new DirectionsRequestOptions()
+        {
+            StripLegsStepsLatLngs = false,
+            StripOverviewPath = false,
+            StripOverviewPolyline = false,
+            StripLegsStepsPath = false,
+            StripLegsSteps = false
+        });
 
+
+        var routes = _directionsResult.Routes.SelectMany(x => x.Legs).ToList();
+
+        foreach (var route in routes)
+        {
+            _durationTotalString += route.DurationInTraffic?.Text;
+            _distanceTotalString += route.Distance.Text;
+        }
     }
-
-
-
-
-
-
-
-    public async Task Autocomplete()
-    {
-        await JSRuntime.InvokeVoidAsync("initAutocomplete");
-    }
-
-
-
 
 
 }
