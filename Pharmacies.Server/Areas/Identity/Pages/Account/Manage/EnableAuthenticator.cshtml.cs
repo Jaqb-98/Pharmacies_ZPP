@@ -148,7 +148,7 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account.Manage
         {
             return string.Format(
                 AuthenticatorUriFormat,
-                _urlEncoder.Encode("Pharmacies.Server"),
+                _urlEncoder.Encode("Pharmacies_ZPP"),
                 _urlEncoder.Encode(email),
                 unformattedKey);
         }
