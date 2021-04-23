@@ -25,26 +25,43 @@
 
 
 
-<div class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col">
             <div class="search">
 
-               @*<label>Search</label>*@
                 <div class="input-group mb-3">
                     <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
-                    <button @onclick="GetLocation" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                    <button @onclick="SearchPharmacies" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
                 </div>
 
             </div>
         </div>
         <div class="col">
-            <select @bind="@_range" class="form-select" aria-label="Default select example">
-                <option selected>Search range</option>
-                <option value="2000">2km</option>
-                <option value="5000">5km</option>
-                <option value="10000">10km</option>
-            </select>
+            <div class="row">
+
+                <div class="col" id="select_range">
+
+                    <select @bind="@_range" class="form-select" aria-label="Default select example">
+                        <option selected>Search range</option>
+                        <option value="2000">2km</option>
+                        <option value="5000">5km</option>
+                        <option value="10000">10km</option>
+                    </select>
+                </div>
+
+                <div class="col" id="TravelMode">
+                    <EditForm Model="travelMode">
+
+                        <InputSelect @bind-Value="travelMode" class="form-select" aria-label="Default select example">
+                            @foreach (var mode in Enum.GetValues(typeof(TravelMode)))
+                            {
+                                <option value="@mode">@mode</option>
+                            }
+                        </InputSelect>
+                    </EditForm>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -57,7 +74,8 @@
                 {
                     @foreach (var pharmacy in _pharmacies.results)
                     {
-                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" Location="@pharmacy.geometry.location" OnClickCallback="CenterMarker" ShowDirections="AddDirections"></PharmacyCard>
+                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" 
+                                      Location="@pharmacy.geometry.location" OnClickCallback="CenterMarker" ShowDirections="AddDirections"></PharmacyCard>
                     }
 
                 }
@@ -65,7 +83,6 @@
         </div>
         <div class="col-8">
             <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()"></GoogleMap>
-
         </div>
     </div>
 </div>
@@ -90,25 +107,22 @@
     private int _range = 2000;
     public int zoom = 14;
 
-
+    //geolocation
     private WindowNavigatorGeolocation geolocation;
     private GeolocationPosition geolocationPosition;
-
-
     private PlaceResult searchedPlace;
 
-    //direcrions
+    //directions
     private DirectionsRenderer dirRend;
     private string _durationTotalString;
     private string _distanceTotalString;
     private DirectionsResult _directionsResult;
+    private TravelMode travelMode = TravelMode.Driving;
 
 
 
-    private async Task GetLocation()
+    private async Task SearchPharmacies()
     {
-        //_address = await JSRuntime.InvokeAsync<string>("SetAddress");
-        // _location = await PharmacyService.GetSearchedLocation(_address);
         _pharmacies = await PharmacyService.SearchPharmacies(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
 
         var coords = new List<LatLngLiteral>();
@@ -121,7 +135,6 @@
             await ClearClustering();
 
         await InvokeClustering(coords);
-        //await JSRuntime.InvokeVoidAsync("SetLocationAndMarkers", _location.lat, _location.lng, zoom, coords);
 
     }
 
@@ -177,9 +190,17 @@
         geolocation = navigator.Geolocation;
 
         await GetUserLocation();
+        try
+        {
 
-        await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = geolocationPosition.Coords.Latitude, Lng = geolocationPosition.Coords.Longitude });
-        await this.map1.InteropObject.SetZoom(zoom);
+            await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = geolocationPosition.Coords.Latitude, Lng = geolocationPosition.Coords.Longitude });
+            await this.map1.InteropObject.SetZoom(zoom);
+        }
+        catch (Exception)
+        {
+            await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = 52.2330269, Lng = 20.7810098 });
+            await this.map1.InteropObject.SetZoom(6);
+        }
 
         dirRend = await DirectionsRenderer.CreateAsync(map1.JsRuntime, new DirectionsRendererOptions()
         {
@@ -189,7 +210,6 @@
         this.StateHasChanged();
 
     }
-
 
 
     public async Task GetUserLocation()
@@ -231,15 +251,6 @@
                 await this.map1.InteropObject.SetCenter(place.Geometry.Location);
                 await this.map1.InteropObject.SetZoom(13);
 
-                //var marker = await Marker.CreateAsync(this.map1.JsRuntime, new MarkerOptions
-                //{
-                //    Position = place.Geometry.Location,
-                //    Map = this.map1.InteropObject,
-                //    Title = place.Name
-                //});
-
-                //this.markers.Push(marker);
-
                 this.message = "Displaying result for " + place.Name;
             }
             else if (place.Geometry.Viewport != null)
@@ -262,27 +273,16 @@
         await dirRend.SetMap(null);
     }
 
-    private async Task OnAfterInitAsync()
-    {
-        //Create instance of DirectionRenderer
-        dirRend = await DirectionsRenderer.CreateAsync(map1.JsRuntime, new DirectionsRendererOptions()
-        {
-            Map = map1.InteropObject
-        });
-    }
-
 
     private async Task AddDirections(Location location)
     {
         //Adding a waypoint
-        // var waypoints = new List<DirectionsWaypoint>();
 
         //Direction Request
         DirectionsRequest dr = new DirectionsRequest();
         dr.Origin = searchedPlace.Geometry.Location;
         dr.Destination = new LatLngLiteral { Lat = location.lat, Lng = location.lng };
-        //dr.Waypoints = waypoints;
-        dr.TravelMode = TravelMode.Driving;
+        dr.TravelMode = travelMode;
         dr.DrivingOptions = new DrivingOptions()
         {
             DepartureTime = DateTime.Now.AddHours(1)
