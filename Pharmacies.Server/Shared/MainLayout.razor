@@ -1,8 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
-<NavBar></NavBar>
-<div class="main">
-    <div class="content px-4">
+<div class="container">
+    <main role="main" class="pb-3">
         @Body
-    </div>
+    </main>
+
 </div>
+<footer class="footer border-top text-muted">
+    <div class="container">
+        &copy; 2021 - Pharmacies.Server - <a asp-area="" asp-page="Privacy">Privacy</a>
+    </div>
+</footer>
