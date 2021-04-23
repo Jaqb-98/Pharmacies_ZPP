@@ -5,8 +5,10 @@
         <h5 class="card-title">@Name</h5>
         <h6 class="card-subtitle mb-2 text-muted">@Vicinity</h6>
         <p class="card-text"></p>
-        <a class="card-link" @onclick="@(()=>OnClickCallback.InvokeAsync(Location))">Show on map</a>
-        <a class="card-link" @onclick="@(()=>ShowDirections.InvokeAsync(Location))">Show directions</a>
+        <button class="btn btn-outline-danger" type="button" @onclick="@(()=>OnClickCallback.InvokeAsync(Location))">Map</button>
+        <button class="btn btn-outline-primary" type="button" @onclick="@(()=>ShowDirections.InvokeAsync(Location))">Directions</button>
+        <button class="btn btn-outline-info" type="button">Info</button>
+
     </div>
 </div>
 
