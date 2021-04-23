@@ -31,10 +31,9 @@ namespace Pharmacies.Server
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddAuthentication("Identity.Application").AddCookie();
             services.AddScoped<IPharmacyService, PharmacyService>();
             services.AddSingleton(Configuration);
-            //services.AddSingleton<LocationService>();
 
         }
 
@@ -56,7 +55,8 @@ namespace Pharmacies.Server
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
