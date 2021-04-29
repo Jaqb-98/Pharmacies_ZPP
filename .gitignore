@@ -2,3 +2,5 @@ Pharmacies_ZPP.sln
 bin
 obj
 .vs
+appsettings.json
+_Host.cshtml
