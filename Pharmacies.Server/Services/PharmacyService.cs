@@ -64,13 +64,6 @@ namespace Pharmacies.Server.Services
                 throw new Exception(response.ReasonPhrase);
         }
 
-        public Rootobject GetObj()
-        {
-            string jsonString = File.ReadAllText(@"E:\Visual Studio workspace\projekt zespołowy\Pharmacies_ZPP\Json\data.json");
-            var json = JsonConvert.DeserializeObject<Rootobject>(jsonString);
-
-            return json;
-        }
 
     
 
