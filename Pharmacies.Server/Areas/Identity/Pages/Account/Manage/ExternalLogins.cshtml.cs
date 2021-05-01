@@ -11,12 +11,12 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account.Manage
 {
     public class ExternalLoginsModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<Pharmacies.Server.Data.ApplicationUser> _userManager;
+        private readonly SignInManager<Pharmacies.Server.Data.ApplicationUser> _signInManager;
 
         public ExternalLoginsModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            UserManager<Pharmacies.Server.Data.ApplicationUser> userManager,
+            SignInManager<Pharmacies.Server.Data.ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

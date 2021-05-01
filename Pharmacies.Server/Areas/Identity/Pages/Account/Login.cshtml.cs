@@ -17,13 +17,13 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class LoginModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<Pharmacies.Server.Data.ApplicationUser> _userManager;
+        private readonly SignInManager<Pharmacies.Server.Data.ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, 
+        public LoginModel(SignInManager<Pharmacies.Server.Data.ApplicationUser> signInManager, 
             ILogger<LoginModel> logger,
-            UserManager<IdentityUser> userManager)
+            UserManager<Pharmacies.Server.Data.ApplicationUser> userManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;

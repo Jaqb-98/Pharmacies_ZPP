@@ -11,18 +11,20 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<Pharmacies.Server.Data.ApplicationUser> _userManager;
+        private readonly SignInManager<Pharmacies.Server.Data.ApplicationUser> _signInManager;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            UserManager<Pharmacies.Server.Data.ApplicationUser> userManager,
+            SignInManager<Pharmacies.Server.Data.ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
         }
 
         public string Username { get; set; }
+
+        public string FullName { get; set; }
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -32,15 +34,23 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(Pharmacies.Server.Data.ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var UserRef = await _userManager.FindByEmailAsync(userName);
+
+            FullName = $"{UserRef.FirstName} {UserRef.LastName}";
+
+
 
             Username = userName;
 

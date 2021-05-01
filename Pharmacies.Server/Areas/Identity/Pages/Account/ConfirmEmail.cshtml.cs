@@ -14,9 +14,9 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ConfirmEmailModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Pharmacies.Server.Data.ApplicationUser> _userManager;
 
-        public ConfirmEmailModel(UserManager<IdentityUser> userManager)
+        public ConfirmEmailModel(UserManager<Pharmacies.Server.Data.ApplicationUser> userManager)
         {
             _userManager = userManager;
         }

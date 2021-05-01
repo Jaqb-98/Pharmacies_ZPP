@@ -15,9 +15,9 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ResetPasswordModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Pharmacies.Server.Data.ApplicationUser> _userManager;
 
-        public ResetPasswordModel(UserManager<IdentityUser> userManager)
+        public ResetPasswordModel(UserManager<Pharmacies.Server.Data.ApplicationUser> userManager)
         {
             _userManager = userManager;
         }
