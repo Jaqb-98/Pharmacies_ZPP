@@ -174,13 +174,6 @@
         await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = markerLocation.lat, Lng = markerLocation.lng });
     }
 
-    private void GetObj()
-    {
-        _pharmacies = PharmacyService.GetObj();
-
-    }
-
-
 
     protected override async Task OnInitializedAsync()
     {
