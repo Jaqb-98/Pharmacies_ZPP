@@ -19,7 +19,7 @@ namespace Pharmacies.Server.Areas.Identity
                     options.UseSqlServer(
                         context.Configuration.GetConnectionString("PharmaciesServerContextConnection")));
 
-                services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                services.AddDefaultIdentity<Pharmacies.Server.Data.ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                     .AddEntityFrameworkStores<PharmaciesServerContext>();
             });
         }
