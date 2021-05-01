@@ -1,10 +1,11 @@
-﻿@page "/pharmacySearch"
+﻿@page "/"
 
-@using Pharmacies.Data.Services
-@using Pharmacies.Data.Interfaces
-@using Pharmacies.Data.Models
+
 @using Pharmacies.Server.Controls
+@using Pharmacies.Server.Interfaces
+@using Pharmacies.Server.Models
 @using System.Linq
+@using Pharmacies.Server.Services
 
 @using GoogleMapsComponents
 @using GoogleMapsComponents.Maps
@@ -74,7 +75,7 @@
                 {
                     @foreach (var pharmacy in _pharmacies.results)
                     {
-                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id" 
+                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id"
                                       Location="@pharmacy.geometry.location" OnClickCallback="CenterMarker" ShowDirections="AddDirections"></PharmacyCard>
                     }
 
