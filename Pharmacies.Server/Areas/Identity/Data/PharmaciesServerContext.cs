@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Pharmacies.Server.Data
 {
-    public class PharmaciesServerContext : IdentityDbContext<IdentityUser>
+    public class PharmaciesServerContext : IdentityDbContext<ApplicationUser>
     {
         public PharmaciesServerContext(DbContextOptions<PharmaciesServerContext> options)
             : base(options)
