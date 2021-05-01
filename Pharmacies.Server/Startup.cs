@@ -1,14 +1,15 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Pharmacies.Data;
-using Pharmacies.Data.Interfaces;
-using Pharmacies.Data.Services;
+using Pharmacies.Server;
+using Pharmacies.Server.Interfaces;
+using Pharmacies.Server.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,7 @@ namespace Pharmacies.Server
             services.AddAuthentication("Identity.Application").AddCookie();
             services.AddScoped<IPharmacyService, PharmacyService>();
             services.AddSingleton(Configuration);
+
 
         }
 
