@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>02a8f487-9d24-4188-8109-bb794fd0446a</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
@@ -70,6 +70,10 @@
     <None Include="wwwroot\css\bootstrap\js\bootstrap.js.map" />
     <None Include="wwwroot\css\bootstrap\js\bootstrap.min.js" />
     <None Include="wwwroot\css\bootstrap\js\bootstrap.min.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>
