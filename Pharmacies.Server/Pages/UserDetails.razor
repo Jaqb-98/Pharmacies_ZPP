@@ -1,0 +1,93 @@
+﻿@using Pharmacies.Server.Data
+@using Pharmacies.Server.Interfaces
+@using Microsoft.AspNetCore.Identity
+@using Pharmacies.Server.Services
+
+@page "/details/{UserId}"
+
+@attribute [Authorize(Roles = "Admin")]
+
+@inject IUsersService UsersService
+@inject IJSRuntime JsRuntime
+
+<h3>UserDetails</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="user">
+
+            @if (User != null)
+            {
+                <h5>Name: @User.FirstName @User.LastName</h5>
+                <h5>Phone number: @User.PhoneNumber</h5>
+                <h5>Email: @User.Email</h5>
+                <h5>Role: @(Role.Name)</h5>
+                @if (Role.Name=="User")
+                {
+                    <button @onclick="@(e=>VerifyUserAccount(User.Id))" class="btn btn-success">Verify</button>
+                }
+                else
+                {
+                    <button @onclick="@(e=>DemoteUser(User.Id))" class="btn btn-danger">Demote</button>
+                }
+                <button @onclick="@(e=>DeleteAccount(User.Id))" class="btn btn-danger">Delete Account</button>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Authorized Access only</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+
+    public ApplicationUser User { get; set; }
+    public IdentityUserRole<string> UserRole { get; set; }
+    public IdentityRole Role { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUser();
+        await GetUserRole();
+    }
+
+    private async Task GetUser()
+    {
+        User = await UsersService.GetUser(UserId);
+    }
+
+    private async Task GetUserRole()
+    {
+        UserRole = await UsersService.GetUserRole(UserId);
+        Role = await UsersService.GetRole(UserRole.RoleId);
+    }
+
+    private void VerifyUserAccount(string id)
+    {
+        UsersService.VerifyAccount(id);
+        Role.Name = "VerifiedUser";
+    }
+
+    private void DemoteUser(string id)
+    {
+        UsersService.DemoteUser(id);
+        Role.Name = "User";
+    }
+
+
+
+    protected async Task DeleteAccount(string id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            await UsersService.DeleteUser(id);
+            User = null;
+        }
+    }
+}
