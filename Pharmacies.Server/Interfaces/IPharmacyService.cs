@@ -11,6 +11,8 @@ namespace Pharmacies.Server.Interfaces
         Task<Rootobject> SearchPharmacies(double lat, double lng, int range, string type = "pharmacy");
         Task<Location> GetSearchedLocation(string input);
 
+        Task<Rootobject> GetPlaceFromText(string input);
+
 
     }
 }
