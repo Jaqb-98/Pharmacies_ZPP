@@ -1,0 +1,59 @@
+﻿@page "/manage"
+@attribute [Authorize(Roles = "VerifiedUser")]
+
+@using GoogleMapsComponents
+@using GoogleMapsComponents.Maps
+@using GoogleMapsComponents.Maps.Places
+@using Pharmacies.Server.Interfaces
+
+@inject IJSRuntime JSRuntime
+@inject IPharmacyService PharmacyService; 
+
+<h3>ManagePage</h3>
+
+<AuthorizeView Roles="VerifiedUser">
+    <Authorized>
+        <div class="input-group mb-3">
+            <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
+            <button @onclick="SelectPharmacy" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Authorized access only!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    private Autocomplete autocomplete;
+    private ElementReference searchBox;
+    private PlaceResult searchedPlace;
+
+    private void SelectPharmacy()
+    {
+        var pharmacy = PharmacyService.GetPlaceFromText($"{searchedPlace.Name}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        this.autocomplete = await Autocomplete.CreateAsync(JSRuntime, this.searchBox, new AutocompleteOptions
+        {
+            StrictBounds = false,
+            ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } },
+            Types = new string[] { "establishment" }
+
+        });
+
+        await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name","place_id" });
+
+        await this.autocomplete.AddListener("place_changed", async () =>
+        {
+            var place = await this.autocomplete.GetPlace();
+            searchedPlace = place;
+
+        });
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}
