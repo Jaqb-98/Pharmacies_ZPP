@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Pharmacies.Server.Data;
+using Pharmacies.Server.Services;
 
 namespace Pharmacies.Server.Areas.Identity.Pages.Account
 {
@@ -21,17 +23,20 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<Pharmacies.Server.Data.ApplicationUser> _signInManager;
         private readonly UserManager<Pharmacies.Server.Data.ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
             UserManager<Pharmacies.Server.Data.ApplicationUser> userManager,
             SignInManager<Pharmacies.Server.Data.ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender )
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
         }
@@ -131,5 +136,7 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
+        
     }
 }
