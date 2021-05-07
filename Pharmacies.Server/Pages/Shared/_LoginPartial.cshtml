@@ -1,14 +1,24 @@
 ﻿@using Microsoft.AspNetCore.Identity
 
+
 @inject SignInManager<Pharmacies.Server.Data.ApplicationUser> SignInManager
 @inject UserManager<Pharmacies.Server.Data.ApplicationUser> UserManager
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item">
-            <a id="dashboard" class="nav-link text-light" href="/dashboard" title="Dashboard">Manage</a>
-        </li>
+        if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a id="dashboard" class="nav-link text-light" href="/dashboard" title="Dashboard">Dashboard</a>
+            </li>
+        }
+        if (User.IsInRole("VerifiedUser"))
+        {
+            <li class="nav-item">
+                <a id="dashboard" class="nav-link text-light" href="/manage" title="Manage">Manage</a>
+            </li>
+        }
         <li class="nav-item">
             <a id="manage" class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">@UserManager.GetUserName(User)!</a>
         </li>
