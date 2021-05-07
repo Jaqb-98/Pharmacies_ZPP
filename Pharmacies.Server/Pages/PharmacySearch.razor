@@ -227,7 +227,8 @@
         this.autocomplete = await Autocomplete.CreateAsync(this.map1.JsRuntime, this.searchBox, new AutocompleteOptions
         {
             StrictBounds = false,
-            ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } }
+            ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } },
+            
         });
 
         await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name" });
