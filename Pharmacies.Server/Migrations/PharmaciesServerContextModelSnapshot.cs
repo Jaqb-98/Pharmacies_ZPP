@@ -225,6 +225,24 @@ namespace Pharmacies.Server.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("Pharmacies.Server.Models.PharmacyModel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Pharmacies");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -274,6 +292,18 @@ namespace Pharmacies.Server.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Pharmacies.Server.Models.PharmacyModel", b =>
+                {
+                    b.HasOne("Pharmacies.Server.Data.ApplicationUser", null)
+                        .WithMany("UsersPharamcies")
+                        .HasForeignKey("ApplicationUserId");
+                });
+
+            modelBuilder.Entity("Pharmacies.Server.Data.ApplicationUser", b =>
+                {
+                    b.Navigation("UsersPharamcies");
                 });
 #pragma warning restore 612, 618
         }
