@@ -8,12 +8,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pharmacies.Server;
+using Pharmacies.Server.Data;
 using Pharmacies.Server.Interfaces;
 using Pharmacies.Server.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.JSInterop;
 
 namespace Pharmacies.Server
 {
@@ -30,10 +34,18 @@ namespace Pharmacies.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<PharmaciesServerContext>(options =>options
+                    .UseSqlServer(Configuration.GetConnectionString("PharmaciesServerContextConnection")));
+
+            services.AddDefaultIdentity<Pharmacies.Server.Data.ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<PharmaciesServerContext>();
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddAuthentication("Identity.Application").AddCookie();
             services.AddScoped<IPharmacyService, PharmacyService>();
+            services.AddScoped<IUsersService, UsersService>();
             services.AddSingleton(Configuration);
 
 

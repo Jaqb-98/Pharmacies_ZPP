@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Pharmacies.Server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,5 +11,6 @@ namespace Pharmacies.Server.Data
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public virtual  IEnumerable<PharmacyModel> UsersPharamcies { get; set; }
     }
 }

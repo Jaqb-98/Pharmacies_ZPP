@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Pharmacies.Server.Models;
+
 
 namespace Pharmacies.Server.Data
 {
@@ -12,7 +14,7 @@ namespace Pharmacies.Server.Data
     {
         public PharmaciesServerContext(DbContextOptions<PharmaciesServerContext> options)
             : base(options)
-        {
+        {  
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -22,5 +24,7 @@ namespace Pharmacies.Server.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<PharmacyModel> Pharmacies { get; set; }
     }
 }
