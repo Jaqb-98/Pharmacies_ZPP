@@ -10,8 +10,9 @@ namespace Pharmacies.Server.Interfaces
     {
         Task<Rootobject> SearchPharmacies(double lat, double lng, int range, string type = "pharmacy");
         Task<Location> GetSearchedLocation(string input);
+        Task<Rootobject> GetPlaceDetails(string id);
 
-        Task<Rootobject> GetPlaceFromText(string input);
+        string GetPhoto(string photoRef, int width, int height);
 
 
     }
