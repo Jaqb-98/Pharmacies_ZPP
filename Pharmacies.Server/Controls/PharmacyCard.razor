@@ -1,13 +1,39 @@
 ﻿@using Pharmacies.Server.Models
+@using Pharmacies.Server.Interfaces
+@inject IPharmacyService PharmacyService
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .checked {
+        color: orange;
+    }
+</style>
 
 <div class="card" style="width: 18rem;">
+    <img src="@ImageSrc" class="card-img-top" alt="" />
     <div class="card-body">
         <h5 class="card-title">@Name</h5>
         <h6 class="card-subtitle mb-2 text-muted">@Vicinity</h6>
-        <p class="card-text"></p>
-        <button class="btn btn-outline-danger" type="button" @onclick="@(()=>OnClickCallback.InvokeAsync(Location))">Map</button>
-        <button class="btn btn-outline-primary" type="button" @onclick="@(()=>ShowDirections.InvokeAsync(Location))">Directions</button>
-        <button class="btn btn-outline-info" type="button">Info</button>
+
+        @if (DetailsAreDisplayed)
+        {
+            for (int i = 0; i < (int)Rating; i++)
+            {
+                <span class="fa fa-star checked"></span>
+            }
+            for (int i = 0; i < 5 - ((int)Rating); i++)
+            {
+                <span class="fa fa-star"></span>
+            }
+            <span>@Rating</span>
+        }
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <button class="btn btn-outline-danger" type="button" @onclick="@(()=>OnClickCallback.InvokeAsync(Location))">Map</button>
+                <button class="btn btn-outline-primary" type="button" @onclick="@(()=>ShowDirections.InvokeAsync(Location))">Directions</button>
+                <button class="btn btn-outline-info" type="button" @onclick="ShowDetails">Info</button>
+            </li>
+        </ul>
 
     </div>
 </div>
@@ -30,9 +56,41 @@
     public RenderFragment Control { get; set; }
 
     [Parameter]
+    public string ImageUrl { get; set; } = String.Empty;
+
+    [Parameter]
+    public float Rating { get; set; }
+
+    private string ImageSrc;
+
+    private bool DetailsAreDisplayed = false;
+
+
+    [Parameter]
     public EventCallback<Location> OnClickCallback { get; set; }
 
     [Parameter]
     public EventCallback<Location> ShowDirections { get; set; }
+
+    private void ShowDetails()
+    {
+        if (!DetailsAreDisplayed)
+        {
+            if (!String.IsNullOrEmpty(ImageUrl))
+                ImageSrc = PharmacyService.GetPhoto(ImageUrl, 400, 200);
+            DetailsAreDisplayed = true;
+            var details = PharmacyService.GetPlaceDetails(PlaceId);
+        }
+        else
+        {
+            ImageSrc = "";
+            DetailsAreDisplayed = false;
+
+        }
+
+        this.StateHasChanged();
+    }
+
+
 
 }
