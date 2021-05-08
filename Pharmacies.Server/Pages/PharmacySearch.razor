@@ -75,8 +75,23 @@
                 {
                     @foreach (var pharmacy in _pharmacies.results)
                     {
-                        <PharmacyCard Name="@pharmacy.name" Vicinity="@pharmacy.vicinity" PlaceId="@pharmacy.place_id"
-                                      Location="@pharmacy.geometry.location" OnClickCallback="CenterMarker" ShowDirections="AddDirections"></PharmacyCard>
+                        string reference;
+                        if (pharmacy.photos != null)
+                        {
+                            reference = pharmacy.photos[0].photo_reference;
+                        }
+                        else
+                        {
+                            reference = String.Empty;
+                        }
+                        <PharmacyCard Name="@pharmacy.name"
+                                      Vicinity="@pharmacy.vicinity"
+                                      PlaceId="@pharmacy.place_id"
+                                      Location="@pharmacy.geometry.location"
+                                      ImageUrl="@reference"
+                                      Rating="@pharmacy.rating"
+                                      OnClickCallback="CenterMarker"
+                                      ShowDirections="AddDirections"></PharmacyCard>
                     }
 
                 }
@@ -120,17 +135,19 @@
     private DirectionsResult _directionsResult;
     private TravelMode travelMode = TravelMode.Driving;
 
+    private string ImageSrc;
+
 
 
     private async Task SearchPharmacies()
     {
         _pharmacies = await PharmacyService.SearchPharmacies(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
 
-        var coords = new List<LatLngLiteral>();
+        var coords = new List<(LatLngLiteral latlng,string name)>();
 
         foreach (var item in _pharmacies.results)
         {
-            coords.Add(new LatLngLiteral { Lat = item.geometry.location.lat, Lng = item.geometry.location.lng });
+            coords.Add((new LatLngLiteral { Lat = item.geometry.location.lat, Lng = item.geometry.location.lng },item.name));
         }
         if (_markerClustering != null)
             await ClearClustering();
@@ -139,7 +156,7 @@
 
     }
 
-    private async Task InvokeClustering(List<LatLngLiteral> coords)
+    private async Task InvokeClustering(List<(LatLngLiteral,string)> coords)
     {
         var markers = await GetMarkers(coords, map1.InteropObject);
 
@@ -152,16 +169,30 @@
         await _markerClustering.ClearMarkers();
     }
 
-    private async Task<IEnumerable<Marker>> GetMarkers(IEnumerable<LatLngLiteral> coords, Map map)
+    private async Task<IEnumerable<Marker>> GetMarkers(IEnumerable<(LatLngLiteral,string)> coords, Map map)
     {
         var result = new List<Marker>(coords.Count());
         foreach (var latLngLiteral in coords)
         {
             var marker = await Marker.CreateAsync(map1.JsRuntime, new MarkerOptions()
             {
-                Position = latLngLiteral,
+                Position = latLngLiteral.Item1,
                 Map = map,
 
+            });
+
+            var infoWindowContent = $@"<p>{latLngLiteral.Item2}</p>";
+
+            var infoWindow = await InfoWindow.CreateAsync(map1.JsRuntime, new InfoWindowOptions()
+            {
+                Position = latLngLiteral.Item1
+            });
+
+            await marker.AddListener("click", async () =>
+            {
+                await infoWindow.SetContent(infoWindowContent);
+                await infoWindow.SetPosition(latLngLiteral.Item1);
+                await infoWindow.Open(map1.InteropObject);
             });
 
             result.Add(marker);
@@ -228,7 +259,7 @@
         {
             StrictBounds = false,
             ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } },
-            
+
         });
 
         await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name" });
@@ -302,6 +333,7 @@
             _distanceTotalString += route.Distance.Text;
         }
     }
+
 
 
 }
