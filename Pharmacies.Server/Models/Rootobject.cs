@@ -11,6 +11,7 @@ namespace Pharmacies.Server.Models
     {
         public object[] html_attributions { get; set; }
         public Result[] results { get; set; }
+        public Result result { get; set; }
         public string status { get; set; }
     }
 
