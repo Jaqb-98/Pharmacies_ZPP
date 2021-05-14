@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Pharmacies.Server.Models;
 
 namespace Pharmacies.Server.Interfaces
 {
@@ -22,6 +23,10 @@ namespace Pharmacies.Server.Interfaces
         Task DeleteUser(string id);
 
         Task<IdentityRole> GetRole(string id);
+
+        Task AddPharmacy(string id, PharmacyModel pharmacy);
+
+        Task<ICollection<PharmacyModel>> GetUsersPharmacies(string id);
 
 
     }
