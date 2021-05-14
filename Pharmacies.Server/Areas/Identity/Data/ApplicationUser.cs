@@ -11,6 +11,11 @@ namespace Pharmacies.Server.Data
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public virtual  IEnumerable<PharmacyModel> UsersPharamcies { get; set; }
+        public virtual ICollection<PharmacyModel> UsersPharamcies { get; set; }
+
+        public ApplicationUser()
+        {
+            UsersPharamcies = new HashSet<PharmacyModel>();
+        }
     }
 }
