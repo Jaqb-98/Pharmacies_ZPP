@@ -4,3 +4,4 @@ obj
 .vs
 appsettings.json
 _Host.cshtml
+**/wwwroot/images/*
