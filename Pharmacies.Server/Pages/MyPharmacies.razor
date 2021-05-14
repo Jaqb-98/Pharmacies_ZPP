@@ -1,0 +1,89 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Pharmacies.Server.Interfaces
+@using Pharmacies.Server.Models
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+
+@page "/mypharmacies"
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUsersService UsersService
+
+@attribute [Authorize(Roles = "VerifiedUser")]
+<h3>MyPharmacies</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="container">
+            <div class="row">
+                <Virtualize Context="pharmacy" ItemsProvider="@LoadPharmacies">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">@pharmacy.Name</h5>
+                            <p class="card-text">@pharmacy.Vicinity</p>
+                            <a href="" class="btn btn-primary">Manage</a>
+                        </div>
+                    </div>
+                </Virtualize>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Add pharmacy</h5>
+                            <p class="card-text"></p>
+                            <a href="/manage" class="btn btn-primary">+</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col"></div>
+                <div class="col"></div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Authorized access only!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    public ClaimsPrincipal User { get; set; }
+    public List<PharmacyModel> UsersPharmacies { get; set; } = new List<PharmacyModel>();
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+
+        if (User.Identity.IsAuthenticated)
+            _claims = User.Claims;
+
+
+        await base.OnInitializedAsync();
+    }
+
+
+    private void GetUsersPharmacies()
+    {
+        var userId = _claims.Where(x => x.Type.Contains("identifier")).Select(x => x.Value).FirstOrDefault();
+
+        var pharmacies = UsersService.GetUsersPharmacies(userId);
+
+        UsersPharmacies = pharmacies.Result.ToList();
+    }
+
+    private async ValueTask<ItemsProviderResult<PharmacyModel>> LoadPharmacies(ItemsProviderRequest request)
+    {
+        var userId = _claims.Where(x => x.Type.Contains("identifier")).Select(x => x.Value).FirstOrDefault();
+
+        var pharmacies = UsersService.GetUsersPharmacies(userId);
+
+        UsersPharmacies = pharmacies.Result.ToList();
+        return new ItemsProviderResult<PharmacyModel>(UsersPharmacies, UsersPharmacies.Count());
+    }
+
+}
+
+
