@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Pharmacies.Server.Models;
 
+
 namespace Pharmacies.Server.Services
 {
     public class UsersService : IUsersService
@@ -76,6 +77,23 @@ namespace Pharmacies.Server.Services
             _context.UserRoles.Remove(userRole);
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AddPharmacy(string id, PharmacyModel pharmacy)
+        {
+            var user = _context.Users.Where(x => x.Id == id).FirstOrDefault();
+            user.UsersPharamcies.Add(pharmacy);
+            await _context.SaveChangesAsync();
+        }
+
+
+        public async Task<ICollection<PharmacyModel>> GetUsersPharmacies(string id)
+        {
+            var pharmacies = _context.Users.Where(x => x.Id == id).Include(x => x.UsersPharamcies).Select(x => x.UsersPharamcies).FirstOrDefault();
+
+            var pharmaciesList = pharmacies.ToList();
+
+            return pharmaciesList;
         }
 
     }
