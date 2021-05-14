@@ -1,4 +1,7 @@
-﻿@page "/manage"
+﻿@using Pharmacies.Server.Models
+@using System.Threading.Tasks
+@using System.Security.Claims
+@page "/manage"
 @attribute [Authorize(Roles = "VerifiedUser")]
 
 @using GoogleMapsComponents
@@ -7,16 +10,48 @@
 @using Pharmacies.Server.Interfaces
 
 @inject IJSRuntime JSRuntime
-@inject IPharmacyService PharmacyService; 
+@inject IPharmacyService PharmacyService
+@inject IUsersService UsersService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>ManagePage</h3>
 
 <AuthorizeView Roles="VerifiedUser">
     <Authorized>
-        <div class="input-group mb-3">
-            <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
-            <button @onclick="SelectPharmacy" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
+                        <button @onclick="SelectPharmacy" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @if (Pharmacy != null)
+                {
+                    <div class="card" style="width: 18rem;">
+                        @{
+                            var imageSrc = PharmacyService.GetPhoto(Pharmacy.result.photos[0].photo_reference, 400, 200);
+                        }
+                        <img src="@imageSrc" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">@Pharmacy.result.name</h5>
+                            <p class="card-text"></p>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">@Pharmacy.result.vicinity</li>
+                            <li class="list-group-item"></li>
+                            <li class="list-group-item"></li>
+                        </ul>
+                        <div class="card-body">
+                            <button @onclick="AddPharmacyToDB" class="btn btn-outline-danger" type="button">Add</button>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
+
     </Authorized>
     <NotAuthorized>
         <p>Authorized access only!</p>
@@ -28,10 +63,26 @@
     private Autocomplete autocomplete;
     private ElementReference searchBox;
     private PlaceResult searchedPlace;
+    public Rootobject Pharmacy { get; set; }
 
-    private void SelectPharmacy()
+    public ClaimsPrincipal User { get; set; }
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+
+    protected override async Task OnInitializedAsync()
     {
-        var pharmacy = PharmacyService.GetPlaceFromText($"{searchedPlace.Name}");
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+
+        if (User.Identity.IsAuthenticated)
+            _claims = User.Claims;
+
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SelectPharmacy()
+    {
+        Pharmacy = await PharmacyService.GetPlaceDetails(searchedPlace.PlaceId);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -45,7 +96,7 @@
 
         });
 
-        await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name","place_id" });
+        await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name", "place_id" });
 
         await this.autocomplete.AddListener("place_changed", async () =>
         {
@@ -56,4 +107,23 @@
 
         await base.OnAfterRenderAsync(firstRender);
     }
+
+    private async Task AddPharmacyToDB()
+    {
+        var userId = _claims.Where(x => x.Type.Contains("identifier")).Select(x => x.Value).FirstOrDefault();
+
+        var pharmacy = new PharmacyModel
+        {
+            Id = searchedPlace.PlaceId,
+            Name = Pharmacy.result.name,
+            PhotoReference = Pharmacy.result.photos[0].photo_reference,
+            lat = (float)searchedPlace.Geometry.Location.Lat,
+            lng = (float)searchedPlace.Geometry.Location.Lng,
+            Vicinity = Pharmacy.result.vicinity
+        };
+        await UsersService.AddPharmacy(userId, pharmacy);
+    }
 }
+
+
+
