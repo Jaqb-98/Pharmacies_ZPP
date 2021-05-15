@@ -1,0 +1,19 @@
+﻿@page "/managepharmacy/{PharmacyId}"
+
+
+    <AuthorizeView>
+        <Authorized>
+            <h3>ManagePharmacy</h3>
+
+        </Authorized>
+        <NotAuthorized>
+            <p>Authorized access only!</p>
+        </NotAuthorized>
+    </AuthorizeView>
+
+
+    @code {
+        [Parameter]
+        public string PharmacyId { get; set; }
+
+    }
