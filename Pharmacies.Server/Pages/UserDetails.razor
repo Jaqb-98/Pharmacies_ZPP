@@ -2,6 +2,7 @@
 @using Pharmacies.Server.Interfaces
 @using Microsoft.AspNetCore.Identity
 @using Pharmacies.Server.Services
+@using Pharmacies.Server.Controls
 
 @page "/details/{UserId}"
 
@@ -9,6 +10,7 @@
 
 @inject IUsersService UsersService
 @inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
 
 <h3>UserDetails</h3>
 
@@ -22,7 +24,7 @@
                 <h5>Phone number: @User.PhoneNumber</h5>
                 <h5>Email: @User.Email</h5>
                 <h5>Role: @(Role.Name)</h5>
-                @if (Role.Name=="User")
+                @if (Role.Name == "User")
                 {
                     <button @onclick="@(e=>VerifyUserAccount(User.Id))" class="btn btn-success">Verify</button>
                 }
@@ -30,8 +32,12 @@
                 {
                     <button @onclick="@(e=>DemoteUser(User.Id))" class="btn btn-danger">Demote</button>
                 }
-                <button @onclick="@(e=>DeleteAccount(User.Id))" class="btn btn-danger">Delete Account</button>
+                <button @onclick="Delete_Click" class="btn btn-danger">Delete Account</button>
             }
+
+            <Pharmacies.Server.Controls.Confirm @ref="DeleteConfirmation" ConfirmationChanged="DeleteAccount">
+
+            </Pharmacies.Server.Controls.Confirm>
         </div>
     </Authorized>
     <NotAuthorized>
@@ -48,6 +54,7 @@
     public ApplicationUser User { get; set; }
     public IdentityUserRole<string> UserRole { get; set; }
     public IdentityRole Role { get; set; }
+    protected ConfirmBase DeleteConfirmation { get; set; }
 
 
     protected override async Task OnInitializedAsync()
@@ -81,13 +88,17 @@
 
 
 
-    protected async Task DeleteAccount(string id)
+    protected async Task DeleteAccount(bool deleteConfirmed)
     {
-        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
-        if (confirmed)
+        if (deleteConfirmed)
         {
-            await UsersService.DeleteUser(id);
-            User = null;
+            await UsersService.DeleteUser(User.Id);
+            NavigationManager.NavigateTo($"/dashboard");
         }
+    }
+
+    protected void Delete_Click()
+    {
+        DeleteConfirmation.Show();
     }
 }
