@@ -32,7 +32,7 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
             SignInManager<Pharmacies.Server.Data.ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender )
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -117,6 +117,9 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
+                    var currentUser =await _userManager.FindByIdAsync(user.Id);
+                    var role = await _userManager.AddToRoleAsync(currentUser, "User");
+
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
                         return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
@@ -137,6 +140,6 @@ namespace Pharmacies.Server.Areas.Identity.Pages.Account
             return Page();
         }
 
-        
+
     }
 }
