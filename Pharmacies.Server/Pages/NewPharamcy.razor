@@ -1,0 +1,145 @@
+﻿@using System.Net.Http.Headers
+@using Pharmacies.Server.Interfaces
+@using Microsoft.AspNetCore.Http
+@using System.IO
+@using Microsoft.AspNetCore.Hosting
+@using GoogleMapsComponents.Maps.Places
+@using Pharmacies.Server.Models
+@using System.Security.Claims
+
+@page "/newpharmacy"
+
+@inject IUsersService UserService
+@inject IWebHostEnvironment env
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<AuthorizeView>
+    <Authorized>
+        <div class="container">
+            <div class="row">
+                <h3>NewPharamcy</h3>
+                <div class="col">
+                    <form @onsubmit="OnSubmit">
+                        <div class="mb-3">
+                            <label for="inputName" class="form-label">Pharmacy name</label>
+                            <input type="text" class="form-control" id="inputName" @bind="newPharmacy.Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputVicinity" class="form-label">Address</label>
+                            <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
+
+                        </div>
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="inputGroupFile01">Upload Photo</label>
+                            <InputFile OnChange="OnInputFileChange" class="form-control" id="inputPharmacyPhoto" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="col"></div>
+            </div>
+        </div>
+
+
+    </Authorized>
+    <NotAuthorized>
+        <p>Authorized access only!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    string Message = "No file selected";
+    IReadOnlyList<IBrowserFile> selectedFiles;
+
+
+    private Autocomplete autocomplete;
+    private ElementReference searchBox;
+    private PlaceResult searchedPlace;
+
+
+    private PharmacyModel newPharmacy = new PharmacyModel();
+
+
+    public ClaimsPrincipal User { get; set; }
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+
+    private void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles();
+        Message = $"{selectedFiles.Count} file(s) selected";
+        this.StateHasChanged();
+    }
+
+    private async void OnSubmit()
+    {
+        var imageRef = await SaveImageOnServer();
+        newPharmacy.Id = Guid.NewGuid().ToString();
+        newPharmacy.lat = (float)searchedPlace.Geometry.Location.Lat;
+        newPharmacy.lng = (float)searchedPlace.Geometry.Location.Lng;
+        newPharmacy.Vicinity = searchedPlace.FormattedAddress.ToString();
+        newPharmacy.PhotoReference = imageRef;
+
+        var userId = _claims.Where(x => x.Type.Contains("identifier")).Select(x => x.Value).FirstOrDefault();
+        await UserService.SavePharmacy(newPharmacy,userId);
+    }
+
+    private async Task<string> SaveImageOnServer()
+    {
+        string uniqueFileName = null;
+        foreach (var photo in selectedFiles)
+        {
+
+            var uploadsFolder = Path.Combine(env.WebRootPath, "images");
+            uniqueFileName = Guid.NewGuid().ToString() + "_" + photo.Name;
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            Stream stream = photo.OpenReadStream();
+            FileStream fs = File.Create(filePath);
+            await stream.CopyToAsync(fs);
+            stream.Close();
+            fs.Close();
+        }
+        Message = $"{selectedFiles.Count} file(s) uploaded on server";
+        this.StateHasChanged();
+
+        return uniqueFileName;
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+        this.autocomplete = await Autocomplete.CreateAsync(JSRuntime, this.searchBox, new AutocompleteOptions
+        {
+            StrictBounds = false,
+            ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } },
+            Types = new string[] { "address" }
+
+        });
+
+        await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name", "place_id", "formatted_address" });
+
+        await this.autocomplete.AddListener("place_changed", async () =>
+        {
+            var place = await this.autocomplete.GetPlace();
+            searchedPlace = place;
+
+        });
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+
+        if (User.Identity.IsAuthenticated)
+            _claims = User.Claims;
+
+
+        await base.OnInitializedAsync();
+    }
+
+}
