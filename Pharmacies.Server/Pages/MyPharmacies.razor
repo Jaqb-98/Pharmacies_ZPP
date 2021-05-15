@@ -22,7 +22,7 @@
                         <div class="card-body">
                             <h5 class="card-title">@pharmacy.Name</h5>
                             <p class="card-text">@pharmacy.Vicinity</p>
-                            <a href="" class="btn btn-primary">Manage</a>
+                            <a href="/managepharmacy/@pharmacy.Id" class="btn btn-primary">Manage</a>
                         </div>
                     </div>
                 </Virtualize>
@@ -34,6 +34,15 @@
                             <h5 class="card-title">Add pharmacy</h5>
                             <p class="card-text"></p>
                             <a href="/manage" class="btn btn-primary">+</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Register new pharmacy</h5>
+                            <p class="card-text"></p>
+                            <a href="/newpharmacy" class="btn btn-primary">+</a>
                         </div>
                     </div>
                 </div>
@@ -49,8 +58,8 @@
 
 @code {
     public ClaimsPrincipal User { get; set; }
-    public List<PharmacyModel> UsersPharmacies { get; set; } = new List<PharmacyModel>();
     private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+    public List<PharmacyModel> UsersPharmacies { get; set; } = new List<PharmacyModel>();
 
     protected override async Task OnInitializedAsync()
     {
