@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Pharmacies.Server.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Pharmacies.Server.Interfaces
 {
@@ -27,6 +28,12 @@ namespace Pharmacies.Server.Interfaces
         Task AddPharmacy(string id, PharmacyModel pharmacy);
 
         Task<ICollection<PharmacyModel>> GetUsersPharmacies(string id);
+
+        string UploadImageOnServer(IFormFile image);
+
+        Task SavePharmacy(PharmacyModel pharmacy, string userId);
+
+        List<PharmacyModel> GetPlacesInRange(double lat, double lng, int rangeInKm);
 
 
     }
