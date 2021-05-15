@@ -18,6 +18,7 @@
 
 @inject IJSRuntime JSRuntime
 @inject IPharmacyService PharmacyService
+@inject IUsersService UsersService
 
 
 
@@ -45,6 +46,8 @@
 
                     <select @bind="@_range" class="form-select" aria-label="Default select example">
                         <option selected>Search range</option>
+                        <option value="500">500m</option>
+                        <option value="1000">1km</option>
                         <option value="2000">2km</option>
                         <option value="5000">5km</option>
                         <option value="10000">10km</option>
@@ -95,6 +98,30 @@
                     }
 
                 }
+
+                @if (usersPharmacies != null)
+                {
+                    @foreach (var pharmacy in usersPharmacies)
+                    {
+                        string reference;
+                        if (pharmacy.PhotoReference != null)
+                        {
+                            reference = pharmacy.PhotoReference;
+                        }
+                        else
+                        {
+                            reference = String.Empty;
+                        }
+                        <PharmacyCard Name="@pharmacy.Name"
+                                      Vicinity="@pharmacy.Vicinity"
+                                      PlaceId="@pharmacy.Id"
+                                      Location="new Location { lat=pharmacy.lat,lng = pharmacy.lng}"
+                                      ImageUrl="@reference"
+                                      OnClickCallback="CenterMarker"
+                                      ShowDirections="AddDirections"></PharmacyCard>
+                    }
+
+                }
             </div>
         </div>
         <div class="col-8">
@@ -120,7 +147,8 @@
     private string _address { get; set; }
     private Location _location;
     public Rootobject _pharmacies;
-    private int _range = 2000;
+    public List<PharmacyModel> usersPharmacies;
+    private int _range = 500;
     public int zoom = 14;
 
     //geolocation
@@ -141,14 +169,35 @@
 
     private async Task SearchPharmacies()
     {
+        usersPharmacies = UsersService.GetPlacesInRange(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
         _pharmacies = await PharmacyService.SearchPharmacies(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
 
-        var coords = new List<(LatLngLiteral latlng,string name)>();
+        var coords = new List<(LatLngLiteral latlng, string name)>();
 
         foreach (var item in _pharmacies.results)
         {
-            coords.Add((new LatLngLiteral { Lat = item.geometry.location.lat, Lng = item.geometry.location.lng },item.name));
+            coords.Add((new LatLngLiteral { Lat = item.geometry.location.lat, Lng = item.geometry.location.lng }, item.name));
         }
+
+        var ids = _pharmacies.results.Select(x => x.place_id).ToList();
+        foreach (var item in ids)
+        {
+            usersPharmacies = usersPharmacies.Where(p => p.Id != item).ToList();
+        }
+
+        foreach (var item in usersPharmacies)
+        {
+            if (!ids.Contains(item.Id))
+            {
+                coords.Add((new LatLngLiteral { Lat = item.lat, Lng = item.lng }, item.Name));
+            }
+            else
+            {
+                var pharmacyToRemove = usersPharmacies.Where(x => x.Id == item.Id).FirstOrDefault();
+                usersPharmacies.Remove(pharmacyToRemove);
+            }
+        }
+
         if (_markerClustering != null)
             await ClearClustering();
 
@@ -156,7 +205,7 @@
 
     }
 
-    private async Task InvokeClustering(List<(LatLngLiteral,string)> coords)
+    private async Task InvokeClustering(List<(LatLngLiteral, string)> coords)
     {
         var markers = await GetMarkers(coords, map1.InteropObject);
 
@@ -169,7 +218,7 @@
         await _markerClustering.ClearMarkers();
     }
 
-    private async Task<IEnumerable<Marker>> GetMarkers(IEnumerable<(LatLngLiteral,string)> coords, Map map)
+    private async Task<IEnumerable<Marker>> GetMarkers(IEnumerable<(LatLngLiteral, string)> coords, Map map)
     {
         var result = new List<Marker>(coords.Count());
         foreach (var latLngLiteral in coords)

@@ -1,6 +1,9 @@
 ﻿@using Pharmacies.Server.Models
 @using Pharmacies.Server.Interfaces
+@using Microsoft.AspNetCore.Hosting
+@using System.IO
 @inject IPharmacyService PharmacyService
+@inject IWebHostEnvironment webHostEnvironment
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
@@ -11,6 +14,7 @@
 
 <div class="card" style="width: 18rem;">
     <img src="@ImageSrc" class="card-img-top" alt="" />
+
     <div class="card-body">
         <h5 class="card-title">@Name</h5>
         <h6 class="card-subtitle mb-2 text-muted">@Vicinity</h6>
@@ -58,6 +62,8 @@
     [Parameter]
     public string ImageUrl { get; set; } = String.Empty;
 
+
+
     [Parameter]
     public float Rating { get; set; }
 
@@ -77,7 +83,18 @@
         if (!DetailsAreDisplayed)
         {
             if (!String.IsNullOrEmpty(ImageUrl))
-                ImageSrc = PharmacyService.GetPhoto(ImageUrl, 400, 200);
+            {
+                string path = Path.Combine(webHostEnvironment.WebRootPath, "images");
+                var fullpath = $"{path}/{ImageUrl}";
+                if (!System.IO.File.Exists(fullpath))
+                {
+                    ImageSrc = PharmacyService.GetPhoto(ImageUrl, 400, 200);
+                }
+                else
+                {
+                    ImageSrc = $"/images/{ImageUrl}";
+                }
+            }
             DetailsAreDisplayed = true;
             var details = PharmacyService.GetPlaceDetails(PlaceId);
         }
