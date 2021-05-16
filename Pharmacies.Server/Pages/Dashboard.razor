@@ -3,46 +3,65 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity;
 @using Pharmacies.Server.Interfaces
+@using Pharmacies.Server.Services
+@using Pharmacies.Server.Controls
 
 @page "/dashboard"
 @attribute [Authorize(Roles = "Admin")]
 
 @inject IUsersService UsersService
 @inject NavigationManager NavigationManager
-<h3>Dashboard</h3>
 
-<AuthorizeView Roles="Admin">
+
+<AuthorizeView>
     <Authorized>
-        <table class="table table-hover">
-            <tr>
-                <th scope="col">FirstName</th>
-                <th scope="col">LastName</th>
-                <th scope="col">Email </th>
-                <th>Actions</th>
-            </tr>
-            <Virtualize Context="user" ItemsProvider="@LoadUsers">
-                <tr>
-                    <td>
-                        @user.FirstName
-                    </td>
-                    <td>
-                        @user.LastName
-                    </td>
-                    <td>
-                        @user.Email
-                    </td>
-                    <td>
-                        <button @onclick="@(e=>SeeDetails(user.Id))" class="btn btn-info">Details</button>
-                    </td>
+        @{
+            int count = 1;
+        }
+        <div class="container">
+            <h3>Users</h3>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-hover">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">First Name</th>
+                            <th scope="col">LastName</th>
+                            <th scope="col">Email </th>
+                            <th>Actions</th>
+                        </tr>
+                        <Virtualize Context="user" ItemsProvider="@LoadUsers">
+                            <tr>
+                                <td>
+                                    @count
+                                    @{count++;}
+                                </td>
+                                <td>
+                                    @user.FirstName
+                                </td>
+                                <td>
+                                    @user.LastName
+                                </td>
+                                <td>
+                                    @user.Email
+                                </td>
+                                <td>
+                                    <button @onclick="@(e=>SeeDetails(user.Id))" class="btn btn-info" type="button">Details</button>
+                                </td>
 
-                </tr>
-            </Virtualize>
-        </table>
+                            </tr>
+                        </Virtualize>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </Authorized>
     <NotAuthorized>
         <p>Authorized access only!</p>
     </NotAuthorized>
 </AuthorizeView>
+
 
 
 
@@ -56,12 +75,10 @@
         return new ItemsProviderResult<ApplicationUser>(Users, Users.Count());
     }
 
-    
 
     private void SeeDetails(string id)
     {
         NavigationManager.NavigateTo($"/details/{id}");
     }
-
 
 }
