@@ -23,10 +23,18 @@
 }
 
 
-.map{
+
+#map1{
     max-width:100%;
-    max-height:100%;
+    max-height:600px;
 }
+
+
+#firstCol {
+    width: 0%;
+    height: 80%;
+}
+
 
 
 
