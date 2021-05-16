@@ -83,7 +83,7 @@
         newPharmacy.PhotoReference = imageRef;
 
         var userId = _claims.Where(x => x.Type.Contains("identifier")).Select(x => x.Value).FirstOrDefault();
-        await UserService.SavePharmacy(newPharmacy,userId);
+        await UserService.SavePharmacy(newPharmacy, userId);
 
         NavigationManager.NavigateTo("/mypharmacies");
     }
