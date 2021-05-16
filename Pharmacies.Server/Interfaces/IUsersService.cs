@@ -13,9 +13,9 @@ namespace Pharmacies.Server.Interfaces
     {
         Task<ICollection<ApplicationUser>> GetUsers();
 
-        Task VerifyAccount(string id);
+        void VerifyAccount(string id);
 
-        Task DemoteUser(string id);
+        void DemoteUser(string id);
 
         Task<IdentityUserRole<string>> GetUserRole(string id);
 
