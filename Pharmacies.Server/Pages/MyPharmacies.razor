@@ -5,56 +5,79 @@
 @using Pharmacies.Server.Models
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 
-@page "/mypharmacies"
 
+@page "/mypharmacies"
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUsersService UsersService
+@inject IJSRuntime JSRuntime
+
+<link href="/css/MyPharmaciesStyle.css" rel="stylesheet" />
 
 @attribute [Authorize(Roles = "VerifiedUser")]
-<h3>MyPharmacies</h3>
 
 <AuthorizeView>
     <Authorized>
         <div class="container">
-            <div class="row">
-                <Virtualize Context="pharmacy" ItemsProvider="@LoadPharmacies">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">@pharmacy.Name</h5>
-                            <p class="card-text">@pharmacy.Vicinity</p>
-                            <a href="/managepharmacy/@pharmacy.Id" class="btn btn-primary">Manage</a>
+            <section>
+                <div class="row">
+                    <div class="col">
+                        <p>
+                            <a class="btn btn-primary collapsible" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                Actions
+                            </a>
+                        </p>
+                        <div class="collapse" id="collapseExample">
+
+                            <div class="card text-center" style="width: 49%; text-align:center; display:inline-block;">
+                                <div class="card-body">
+                                    <h5 class="card-title">Add existing pharmacy</h5>
+                                    <p class="card-text"></p>
+                                    <a href="/manage" class="btn btn-primary">+</a>
+                                </div>
+                            </div>
+
+
+                            <div class="card text-center" style="width: 49%; text-align:center; display:inline-block;">
+                                <div class="card-body">
+                                    <h5 class="card-title">Register new pharmacy</h5>
+                                    <p class="card-text"></p>
+                                    <a href="/newpharmacy" class="btn btn-primary">+</a>
+                                </div>
+                            </div>
+
                         </div>
-                    </div>
-                </Virtualize>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Add pharmacy</h5>
-                            <p class="card-text"></p>
-                            <a href="/manage" class="btn btn-primary">+</a>
-                        </div>
+
+
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">Register new pharmacy</h5>
-                            <p class="card-text"></p>
-                            <a href="/newpharmacy" class="btn btn-primary">+</a>
-                        </div>
+            </section>
+            <hr />
+            <section>
+                <h3>Your Pharmacies</h3>
+
+                <div class="row">
+                    <div class="col">
+                        <Virtualize Context="pharmacy" ItemsProvider="@LoadPharmacies">
+                            <div class="card text-center pharmacies">
+                                <div class="card-body">
+                                    <h5 class="card-title">@pharmacy.Name</h5>
+                                    <p class="card-text">@pharmacy.Vicinity</p>
+                                    <a href="/managepharmacy/@pharmacy.Id" class="btn btn-primary">Manage</a>
+                                </div>
+                            </div>
+                        </Virtualize>
                     </div>
+
                 </div>
-                <div class="col"></div>
-                <div class="col"></div>
-            </div>
+            </section>
         </div>
+
     </Authorized>
     <NotAuthorized>
         <p>Authorized access only!</p>
     </NotAuthorized>
 </AuthorizeView>
+
 
 @code {
     public ClaimsPrincipal User { get; set; }
@@ -93,6 +116,13 @@
         return new ItemsProviderResult<PharmacyModel>(UsersPharmacies, UsersPharmacies.Count());
     }
 
+    private async Task Expand()
+    {
+        await JSRuntime.InvokeVoidAsync("expand");
+    }
+
 }
+
+
 
 
