@@ -71,7 +71,7 @@ namespace Pharmacies.Server.Services
         public async Task<Rootobject> GetPlaceDetails(string id)
         {
             var baseUrl = _configuration.GetSection("Api").GetSection("details").Value;
-            var parameters = $"place_id={id}&key={_apiKey}&fields=vicinity,name,photo,phone_number,opening_hours";
+            var parameters = $"place_id={id}&key={_apiKey}&fields=vicinity,name,photo,opening_hours";
 
             var url = $"{baseUrl}{parameters}";
 
