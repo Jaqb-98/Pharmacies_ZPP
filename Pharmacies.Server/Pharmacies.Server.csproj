@@ -70,6 +70,7 @@
     <None Include="wwwroot\css\bootstrap\js\bootstrap.js.map" />
     <None Include="wwwroot\css\bootstrap\js\bootstrap.min.js" />
     <None Include="wwwroot\css\bootstrap\js\bootstrap.min.js.map" />
+    <None Include="wwwroot\css\MyPharmaciesStyle.css" />
   </ItemGroup>
 
   <ItemGroup>
