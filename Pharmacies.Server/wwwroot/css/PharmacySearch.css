@@ -1,4 +1,4 @@
-﻿body, html {
+﻿﻿body, html {
     margin: 0;
     overflow: hidden;
     height: 100%;
@@ -11,32 +11,19 @@
     overflow-y: scroll;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+    /*     Hide scrollbar for Chrome, Safari and Opera */
     .pharmacies::-webkit-scrollbar {
         display: none;
     }
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .pharmacies {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /*IE and Edge */
+    scrollbar-width: none; /*Firefox */
 }
 
 
-
-#map1{
-    max-width:100%;
-    max-height:600px;
+.map {
+    max-width: 100%;
+    max-height: 100%;
 }
-
-
-#firstCol {
-    width: 0%;
-    height: 80%;
-}
-
-
-
-
-
-
