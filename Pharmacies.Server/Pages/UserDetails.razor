@@ -12,33 +12,44 @@
 @inject IJSRuntime JsRuntime
 @inject NavigationManager NavigationManager
 
-<h3>UserDetails</h3>
+
 
 <AuthorizeView>
     <Authorized>
-        <div class="user">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="user">
+                        <h3>User Details</h3>
 
-            @if (User != null)
-            {
-                <h5>Name: @User.FirstName @User.LastName</h5>
-                <h5>Phone number: @User.PhoneNumber</h5>
-                <h5>Email: @User.Email</h5>
-                <h5>Role: @(Role.Name)</h5>
-                @if (Role.Name == "User")
-                {
-                    <button @onclick="@(e=>VerifyUserAccount(User.Id))" class="btn btn-success">Verify</button>
-                }
-                else
-                {
-                    <button @onclick="@(e=>DemoteUser(User.Id))" class="btn btn-danger">Demote</button>
-                }
-                <button @onclick="Delete_Click" class="btn btn-danger">Delete Account</button>
-            }
+                        @if (User != null)
+                        {
+                            <h5>Name: @User.FirstName @User.LastName</h5>
+                            <h5>Phone number: @User.PhoneNumber</h5>
+                            <h5>Email: @User.Email</h5>
+                            <h5>Role: @(Role.Name)</h5>
 
-            <Pharmacies.Server.Controls.Confirm @ref="DeleteConfirmation" ConfirmationChanged="DeleteAccount">
 
-            </Pharmacies.Server.Controls.Confirm>
+                            @if (Role.Name == "User")
+                            {
+                                <button @onclick="@(e => VerifyUserAccount(User.Id))" class="btn btn-success">Verify</button>
+                            }
+                            else
+                            {
+                                <button @onclick="@(e => DemoteUser(User.Id))" class="btn btn-danger">Demote</button>
+                            }
+                            <button @onclick="Delete_Click" class="btn btn-danger">Delete Account</button>
+
+                        }
+
+                        <Pharmacies.Server.Controls.Confirm @ref="DeleteConfirmation" ConfirmationChanged="DeleteAccount">
+
+                        </Pharmacies.Server.Controls.Confirm>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </Authorized>
     <NotAuthorized>
         <p>Authorized Access only</p>
