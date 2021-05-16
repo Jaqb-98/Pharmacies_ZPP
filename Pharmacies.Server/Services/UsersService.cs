@@ -34,7 +34,7 @@ namespace Pharmacies.Server.Services
             return await _context.Users.Where(x => usersIds.Contains(x.Id)).ToListAsync();
         }
 
-        public async Task VerifyAccount(string id)
+        public void VerifyAccount(string id)
         {
             var record = _context.UserRoles.FirstOrDefault(x => x.UserId == id);
             if (record != null)
@@ -43,11 +43,11 @@ namespace Pharmacies.Server.Services
                 var verifiedRole = _context.Roles.Where(x => x.Name == "VerifiedUser").FirstOrDefault();
                 var newUserRole = new IdentityUserRole<string> { RoleId = verifiedRole.Id, UserId = id };
                 _context.UserRoles.Add(newUserRole);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
 
         }
-        public async Task DemoteUser(string id)
+        public void DemoteUser(string id)
         {
             var record = _context.UserRoles.FirstOrDefault(x => x.UserId == id);
             if (record != null)
@@ -56,7 +56,7 @@ namespace Pharmacies.Server.Services
                 var userRole = _context.Roles.Where(x => x.Name == "User").FirstOrDefault();
                 var newUserRole = new IdentityUserRole<string> { RoleId = userRole.Id, UserId = id };
                 _context.UserRoles.Add(newUserRole);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
             }
         }
         public async Task DeleteUser(string id)
