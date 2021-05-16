@@ -26,8 +26,7 @@
 
 
 
-
-<div class="container-fluid">
+<div class="container flex-grow-1" style="height:100%">
     <div class="row">
         <div class="col">
             <div class="search">
@@ -71,11 +70,18 @@
 
 
 
-    <div class="row">
-        <div class="col">
+    <div class="row  flex-grow-1" style="height:100%">
+        <div class="column" id="firstCol">
             <div class="pharmacies">
+
                 @if (_pharmacies != null)
                 {
+                    <style>
+                        #firstCol {
+                            width: 30%;
+                            height: 80%;
+                        }
+                    </style>
                     @foreach (var pharmacy in _pharmacies.results)
                     {
                         string reference;
@@ -124,8 +130,8 @@
                 }
             </div>
         </div>
-        <div class="col-8">
-            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()"></GoogleMap>
+        <div class="col-sm flex-grow-1" width="100%">
+            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()" Height="100%" CssClass="flex-grow-1"></GoogleMap>
         </div>
     </div>
 </div>

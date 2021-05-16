@@ -3,6 +3,7 @@
 
 @inject IWebHostEnvironment Environment
 @inject ICompositeViewEngine Engine
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -49,11 +50,11 @@
             @RenderBody()
         </main>
     </div>
-    <footer class="footer border-top text-muted">
+    @*<footer class="footer border-top text-muted">
         <div class="container">
             &copy; 2021 - Pharmacies.Server - <a asp-area="" asp-page="Privacy">Privacy</a>
         </div>
-    </footer>
+    </footer>*@
     <script src="~/Identity/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
