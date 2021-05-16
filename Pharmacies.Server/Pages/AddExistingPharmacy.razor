@@ -1,7 +1,7 @@
 ﻿@using Pharmacies.Server.Models
 @using System.Threading.Tasks
 @using System.Security.Claims
-@page "/manage"
+@page "/addexistingpharmacy"
 @attribute [Authorize(Roles = "VerifiedUser")]
 
 @using GoogleMapsComponents
@@ -14,19 +14,21 @@
 @inject IUsersService UsersService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<h3>ManagePage</h3>
 
 <AuthorizeView Roles="VerifiedUser">
     <Authorized>
         <div class="container">
             <div class="row">
                 <div class="col">
+                    <h3>Add existing pharmacy</h3>
                     <div class="input-group mb-3">
-                        <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
+                        <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="Pharmacy name" aria-label="" aria-describedby="button-addon2" />
                         <button @onclick="SelectPharmacy" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
                     </div>
                 </div>
+                <div class="col"></div>
             </div>
+            <hr />
             <div class="row">
                 @if (Pharmacy != null)
                 {
@@ -37,17 +39,15 @@
                         <img src="@imageSrc" class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 class="card-title">@Pharmacy.result.name</h5>
-                            <p class="card-text"></p>
+                            <h6 class="card-subtitle mb-2 text-muted">@Pharmacy.result.vicinity</h6>
                         </div>
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item">@Pharmacy.result.vicinity</li>
-                            <li class="list-group-item"></li>
-                            <li class="list-group-item"></li>
+                            <li class="list-group-item">
+                                <button class="btn btn-outline-danger" type="button" @onclick="AddPharmacyToDB">Add</button>
+                            </li>
                         </ul>
-                        <div class="card-body">
-                            <button @onclick="AddPharmacyToDB" class="btn btn-outline-danger" type="button">Add</button>
-                        </div>
                     </div>
+
                 }
             </div>
         </div>
