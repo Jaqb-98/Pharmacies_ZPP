@@ -13,11 +13,12 @@
 @inject IWebHostEnvironment env
 @inject IJSRuntime JSRuntime
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 <AuthorizeView>
     <Authorized>
         <div class="container">
             <div class="row">
-                <h3>NewPharamcy</h3>
+                <h3>New Pharamcy</h3>
                 <div class="col">
                     <form @onsubmit="OnSubmit">
                         <div class="mb-3">
@@ -83,6 +84,8 @@
 
         var userId = _claims.Where(x => x.Type.Contains("identifier")).Select(x => x.Value).FirstOrDefault();
         await UserService.SavePharmacy(newPharmacy,userId);
+
+        NavigationManager.NavigateTo("/mypharmacies");
     }
 
     private async Task<string> SaveImageOnServer()
