@@ -26,6 +26,10 @@ namespace Pharmacies.Server.Services
             _webHostEnvironment = hostEnvironment;
         }
 
+        /// <summary>
+        /// Returns all verified and unverified users
+        /// </summary>
+        /// <returns></returns>
         public async Task<ICollection<ApplicationUser>> GetUsers()
         {
             var adminRoleId = _context.Roles.Where(x => x.Name == "Admin").Select(x => x.Id).FirstOrDefault();
@@ -34,6 +38,10 @@ namespace Pharmacies.Server.Services
             return await _context.Users.Where(x => usersIds.Contains(x.Id)).ToListAsync();
         }
 
+        /// <summary>
+        /// Changes users role to VerifiedUser
+        /// </summary>
+        /// <param name="id">Users id</param>
         public void VerifyAccount(string id)
         {
             var record = _context.UserRoles.FirstOrDefault(x => x.UserId == id);
@@ -47,6 +55,11 @@ namespace Pharmacies.Server.Services
             }
 
         }
+
+        /// <summary>
+        /// Changes users role to User
+        /// </summary>
+        /// <param name="id">Users id</param>
         public void DemoteUser(string id)
         {
             var record = _context.UserRoles.FirstOrDefault(x => x.UserId == id);
@@ -59,6 +72,12 @@ namespace Pharmacies.Server.Services
                 _context.SaveChanges();
             }
         }
+
+        /// <summary>
+        /// Disactivates users account
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task DeleteUser(string id)
         {
             var record = _context.UserRoles.FirstOrDefault(x => x.UserId == id);
@@ -72,22 +91,45 @@ namespace Pharmacies.Server.Services
             }
         }
 
+
+        /// <summary>
+        /// Returns the role of the user with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IdentityUserRole<string>> GetUserRole(string id)
         {
             return await _context.UserRoles.Where(x => x.UserId == id).FirstOrDefaultAsync();
         }
 
+
+        /// <summary>
+        /// Returns user with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ApplicationUser> GetUser(string id)
         {
             return await _context.Users.Where(x => x.Id == id).FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Returns role with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<IdentityRole> GetRole(string id)
         {
             return await _context.Roles.Where(x => x.Id == id).FirstOrDefaultAsync();
         }
 
 
+        /// <summary>
+        /// Adds pharmacy to user with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="pharmacy"></param>
+        /// <returns></returns>
         public async Task AddPharmacy(string id, PharmacyModel pharmacy)
         {
             var user = _context.Users.Where(x => x.Id == id).FirstOrDefault();
@@ -95,7 +137,11 @@ namespace Pharmacies.Server.Services
             await _context.SaveChangesAsync();
         }
 
-
+        /// <summary>
+        /// Returns list of all pharmacies assigned to user with the given id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ICollection<PharmacyModel>> GetUsersPharmacies(string id)
         {
             var pharmacies = _context.Users.Where(x => x.Id == id).Include(x => x.UsersPharamcies).Select(x => x.UsersPharamcies).FirstOrDefault();
@@ -105,7 +151,10 @@ namespace Pharmacies.Server.Services
             return pharmaciesList;
         }
 
-
+        /// <summary>
+        /// Uploads image with unique name to the server 
+        /// <param name="image"></param>
+        /// <returns></returns>
         public string UploadImageOnServer(IFormFile image)
         {
             string uniqueFileName = null;
@@ -125,6 +174,12 @@ namespace Pharmacies.Server.Services
 
         }
 
+        /// <summary>
+        /// Adds new pharmacy object to user with the given id
+        /// </summary>
+        /// <param name="pharmacy"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async Task SavePharmacy(PharmacyModel pharmacy, string userId)
         {
             var user = _context.Users.Where(x => x.Id == userId).FirstOrDefault();
@@ -133,6 +188,13 @@ namespace Pharmacies.Server.Services
         }
 
 
+        /// <summary>
+        /// Returns all places that are in range of given coordinates
+        /// </summary>
+        /// <param name="lat">Latitude</param>
+        /// <param name="lng">Longtitude</param>
+        /// <param name="rangeInMeters">Search radius in meters</param>
+        /// <returns></returns>
         public List<PharmacyModel> GetPlacesInRange(double lat, double lng, int rangeInMeters)
         {
 

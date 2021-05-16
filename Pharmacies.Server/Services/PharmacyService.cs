@@ -27,6 +27,14 @@ namespace Pharmacies.Server.Services
         }
 
 
+        /// <summary>
+        /// Returns places that are in range of given coordinates (GOOGLE API)
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lng"></param>
+        /// <param name="range"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public async Task<Rootobject> SearchPharmacies(double lat, double lng, int range, string type = "pharmacy")
         {
             var baseUrl = _configuration.GetSection("Api").GetSection("PlacesApi_nearbysearch");
@@ -47,6 +55,11 @@ namespace Pharmacies.Server.Services
 
         }
 
+        /// <summary>
+        /// Transforms given address to coordinates (GOOGLE API)
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         public async Task<Location> GetSearchedLocation(string input)
         {
             var encodedInput = input.Replace(" ", "+");
@@ -68,6 +81,11 @@ namespace Pharmacies.Server.Services
         }
 
 
+        /// <summary>
+        /// Returns details of the place with given id (GOOGLE API)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<Rootobject> GetPlaceDetails(string id)
         {
             var baseUrl = _configuration.GetSection("Api").GetSection("details").Value;
@@ -87,6 +105,13 @@ namespace Pharmacies.Server.Services
 
         }
 
+        /// <summary>
+        /// Returns photo from given reference (GOOGLE API)
+        /// </summary>
+        /// <param name="photoRef"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
         public string GetPhoto(string photoRef, int width, int height)
         {
             var baseUrl = _configuration.GetSection("Api").GetSection("photo").Value;
