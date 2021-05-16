@@ -1,21 +1,6 @@
 ﻿@page "/"
 
 
-@using Pharmacies.Server.Controls
-@using Pharmacies.Server.Interfaces
-@using Pharmacies.Server.Models
-@using System.Linq
-@using Pharmacies.Server.Services
-
-@using GoogleMapsComponents
-@using GoogleMapsComponents.Maps
-@using GoogleMapsComponents.Maps.Places
-@using GoogleMapsComponents.Maps.Coordinates
-
-@using BrowserInterop.Extensions
-@using BrowserInterop.Geolocation
-
-
 @inject IJSRuntime JSRuntime
 @inject IPharmacyService PharmacyService
 @inject IUsersService UsersService
@@ -131,7 +116,7 @@
             </div>
         </div>
         <div class="col-sm flex-grow-1" width="100%">
-            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()" Height="100%" CssClass="flex-grow-1"></GoogleMap>
+            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()" Height="100%"></GoogleMap>
         </div>
     </div>
 </div>
