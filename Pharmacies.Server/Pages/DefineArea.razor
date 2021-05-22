@@ -11,12 +11,35 @@
         <div class="container">
             <div class="row">
                 <div class="col-2">
-                    <button @onclick="StartDrawingPolygon" class="btn btn-primary">Start drawing area</button>
-                    <button @onclick="EndDrawingPolygon" class="btn btn-primary">End drawing area</button>
-                    <button @onclick="ResetDrawing" class="btn btn-primary">Reset</button>
+                    <div class="row">
+                        <button @onclick="StartDrawingPolygon" class="btn btn-primary">Start drawing area</button>
+
+                    </div>
+                    <div class="row mt-2">
+
+                        <button @onclick="EndDrawingPolygon" class="btn btn-primary">End drawing area</button>
+                    </div>
+                    <div class="row mt-2">
+                        <button @onclick="ResetDrawing" class="btn btn-primary">Reset</button>
+
+                    </div>
+                    <div class="row mt-2">
+                        <hr />
+                        <button @onclick="AddArea" class="btn btn-primary">Add area</button>
+                    </div>
                 </div>
                 <div class="col-10">
-                    <GoogleMap @ref="@map" Id="map1" Options="@mapOptions" OnAfterInit="async () => await OnAfterMapInit()"></GoogleMap>
+                    <div class="row">
+                        <div class="input-group mb-3">
+                            @if (MapIsRendered)
+                            {
+                                <AutocompleteInput Map="@map" Fields="Fields" @ref="autocompleteInput"></AutocompleteInput>
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <GoogleMap @ref="@map" Id="map" Options="@mapOptions" OnAfterInit="OnAftermapInit "></GoogleMap>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,6 +61,11 @@
     private List<Polygon> polygons = new List<Polygon>();
     private Polygon polygon;
 
+    private AutocompleteInput autocompleteInput;
+
+    private string[] Fields = { "geometry", "name", "place_id" };
+
+    private bool MapIsRendered = false;
 
 
     //geolocation
@@ -45,20 +73,6 @@
     private GeolocationPosition geolocationPosition;
     private int zoom = 13;
 
-
-    //protected override void OnInitialized()
-    //{
-    //    mapOptions = new MapOptions()
-    //    {
-    //        Zoom = zoom,
-    //        Center = new LatLngLiteral()
-    //        {
-    //            Lat = 13.505892,
-    //            Lng = 100.8162
-    //        },
-    //        MapTypeId = MapTypeId.Roadmap
-    //    };
-    //}
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,5 +170,18 @@
             polygon.SetMap(null);
             polygon = null;
         }
+    }
+
+    private void AddArea()
+    {
+
+    }
+
+
+    private async Task OnAftermapInit()
+    {
+        MapIsRendered = true;
+        await map.InteropObject.AddListener<MouseEvent>("click", async (e) => await OnClick(e));
+        await autocompleteInput.InitAutocomplete();
     }
 }
