@@ -1,0 +1,160 @@
+﻿@page "/definearea"
+@using Newtonsoft.Json
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@inject IJSRuntime JSRuntime
+@attribute [Authorize(Roles = "Admin")]
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3>Define Area</h3>
+        <div class="container">
+            <div class="row">
+                <div class="col-2">
+                    <button @onclick="StartDrawingPolygon" class="btn btn-primary">Start drawing area</button>
+                    <button @onclick="EndDrawingPolygon" class="btn btn-primary">End drawing area</button>
+                    <button @onclick="ResetDrawing" class="btn btn-primary">Reset</button>
+                </div>
+                <div class="col-10">
+                    <GoogleMap @ref="@map" Id="map1" Options="@mapOptions" OnAfterInit="async () => await OnAfterMapInit()"></GoogleMap>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private GoogleMap map;
+    private MapOptions mapOptions;
+
+    private List<LatLngLiteral> path = new List<LatLngLiteral>();
+
+    private List<Polyline> polylines = new List<Polyline>();
+    private Polyline polyline;
+
+    private List<Polygon> polygons = new List<Polygon>();
+    private Polygon polygon;
+
+
+
+    //geolocation
+    private WindowNavigatorGeolocation geolocation;
+    private GeolocationPosition geolocationPosition;
+    private int zoom = 13;
+
+
+    //protected override void OnInitialized()
+    //{
+    //    mapOptions = new MapOptions()
+    //    {
+    //        Zoom = zoom,
+    //        Center = new LatLngLiteral()
+    //        {
+    //            Lat = 13.505892,
+    //            Lng = 100.8162
+    //        },
+    //        MapTypeId = MapTypeId.Roadmap
+    //    };
+    //}
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var window = await JSRuntime.Window();
+        var navigator = await window.Navigator();
+
+        geolocation = navigator.Geolocation;
+
+        await GetUserLocation();
+        try
+        {
+
+            await this.map.InteropObject.SetCenter(new LatLngLiteral { Lat = geolocationPosition.Coords.Latitude, Lng = geolocationPosition.Coords.Longitude });
+            await this.map.InteropObject.SetZoom(zoom);
+        }
+        catch (Exception)
+        {
+            await this.map.InteropObject.SetCenter(new LatLngLiteral { Lat = 52.2330269, Lng = 20.7810098 });
+            await this.map.InteropObject.SetZoom(6);
+        }
+
+        this.StateHasChanged();
+
+    }
+
+    public async Task GetUserLocation()
+    {
+        geolocationPosition = (await geolocation.GetCurrentPosition(new PositionOptions()
+        {
+            EnableHighAccuracy = true,
+            MaximumAgeTimeSpan = TimeSpan.FromHours(1),
+            TimeoutTimeSpan = TimeSpan.FromMinutes(1)
+        })).Location;
+
+    }
+
+
+    private async Task OnAfterMapInit()
+    {
+        await map.InteropObject.AddListener<MouseEvent>("click", async (e) => await OnClick(e));
+    }
+
+
+    private async Task OnClick(MouseEvent e)
+    {
+        //Debug.WriteLine($"Onclick : {mouseEvent.LatLng}");
+
+        path.Add(e.LatLng);
+
+        if (polyline != null)
+        {
+            //Debug.WriteLine($"Path length : {path.Count()}");
+
+            await polyline.SetPath(path);
+        }
+        else if (polygon != null)
+        {
+            await polygon.SetPath(path);
+        }
+    }
+
+
+
+    private async Task StartDrawingPolygon()
+    {
+        polygon = await Polygon.CreateAsync(map.JsRuntime, new PolygonOptions()
+        {
+            Draggable = false,
+            Editable = true,
+            Map = map.InteropObject
+        });
+
+        path.Clear();
+    }
+
+    private async void EndDrawingPolygon()
+    {
+        polygons.Add(polygon);
+
+        polygon = null;
+        path.Clear();
+    }
+
+    private void ResetDrawing()
+    {
+        foreach (var polygon in polygons)
+        {
+            polygon.SetMap(null);
+        }
+        polygons.Clear();
+
+        if (polygon != null)
+        {
+            polygon.SetMap(null);
+            polygon = null;
+        }
+    }
+}
