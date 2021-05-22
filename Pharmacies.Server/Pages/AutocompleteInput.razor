@@ -1,0 +1,68 @@
+﻿<input type="text"
+       @ref="this.searchBox"
+       id="searchBox"
+       class="form-control"
+       placeholder=""
+       aria-label=""
+       aria-describedby="button-addon2" />
+
+
+
+@code {
+    private Autocomplete autocomplete;
+    private ElementReference searchBox;
+    private string message;
+    private PlaceResult searchedPlace;
+
+    [Parameter]
+    public EventCallback<PlaceResult> GetSearchedPlace { get; set; }
+
+    [Parameter]
+    public GoogleMap Map { get; set; }
+
+    [Parameter]
+    public string[] Fields { get; set; }
+
+    [Parameter]
+    public string[] Types { get; set; } = null;
+
+    public async Task InitAutocomplete()
+    {
+        if (Map != null)
+        {
+
+            this.autocomplete = await Autocomplete.CreateAsync(this.Map.JsRuntime, this.searchBox, new AutocompleteOptions
+            {
+                StrictBounds = false,
+                ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } },
+                Types = this.Types
+            });
+
+            await this.autocomplete.SetFields(Fields);
+
+            await this.autocomplete.AddListener("place_changed", async () =>
+            {
+                var place = await this.autocomplete.GetPlace();
+                searchedPlace = place;
+                if (place?.Geometry == null)
+                {
+                    this.message = "No results available for " + place?.Name;
+                }
+                else if (place.Geometry.Location != null)
+                {
+                    await this.Map.InteropObject.SetCenter(place.Geometry.Location);
+                    await this.Map.InteropObject.SetZoom(13);
+
+                    this.message = "Displaying result for " + place.Name;
+                }
+                else if (place.Geometry.Viewport != null)
+                {
+                    await this.Map.InteropObject.FitBounds(place.Geometry.Viewport, 5);
+                    this.message = "Displaying result for " + place.Name;
+                }
+                await GetSearchedPlace.InvokeAsync(searchedPlace);
+                this.StateHasChanged();
+            });
+        }
+    }
+}
