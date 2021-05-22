@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <GoogleMap @ref="@map" Id="map" Options="@mapOptions" OnAfterInit="OnAftermapInit "></GoogleMap>
+                        <GoogleMap @ref="@map" Id="map" Options="@mapOptions" OnAfterInit="OnAfterMapInit "></GoogleMap>
                     </div>
                 </div>
             </div>
@@ -111,11 +111,6 @@
     }
 
 
-    private async Task OnAfterMapInit()
-    {
-        await map.InteropObject.AddListener<MouseEvent>("click", async (e) => await OnClick(e));
-    }
-
 
     private async Task OnClick(MouseEvent e)
     {
@@ -178,7 +173,7 @@
     }
 
 
-    private async Task OnAftermapInit()
+    private async Task OnAfterMapInit()
     {
         MapIsRendered = true;
         await map.InteropObject.AddListener<MouseEvent>("click", async (e) => await OnClick(e));
