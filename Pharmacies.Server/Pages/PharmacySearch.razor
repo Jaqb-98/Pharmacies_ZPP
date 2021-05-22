@@ -13,7 +13,10 @@
             <div class="search">
 
                 <div class="input-group mb-3">
-                    <input type="text" @ref="this.searchBox" id="searchBox" class="form-control" placeholder="" aria-label="" aria-describedby="button-addon2" />
+                    @if (MapIsRendered)
+                    {
+                        <AutocompleteInput Map="map1" Fields="Fields" @ref="autocompleteInput" GetSearchedPlace="SetSearchedPlace"></AutocompleteInput>
+                    }
                     <button @onclick="SearchPharmacies" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
                 </div>
 
@@ -106,7 +109,7 @@
             </div>
         </div>
         <div class="col-8">
-            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="async () => await OnAfterMapInit()"></GoogleMap>
+            <GoogleMap @ref="@(this.map1)" Id="map1" Options="@(this.mapOptions)" OnAfterInit="OnAfterMapInit"></GoogleMap>
         </div>
     </div>
 </div>
@@ -116,14 +119,17 @@
 @code {
     private GoogleMap map1;
     private MapOptions mapOptions;
-    private Autocomplete autocomplete;
 
     private readonly Stack<Marker> markers = new Stack<Marker>();
     private MarkerClustering _markerClustering;
 
-    private string message;
-
-    private ElementReference searchBox;
+    //autocomplete
+    private AutocompleteInput autocompleteInput;
+    private string[] Fields = { "address_components", "geometry", "name" };
+    private bool MapIsRendered = false;
+    //private Autocomplete autocomplete;
+    //private string message;
+    //private ElementReference searchBox;
 
     private string _address { get; set; }
     private Location _location;
@@ -283,42 +289,16 @@
 
     private async Task OnAfterMapInit()
     {
-
-
-        this.autocomplete = await Autocomplete.CreateAsync(this.map1.JsRuntime, this.searchBox, new AutocompleteOptions
-        {
-            StrictBounds = false,
-            ComponentRestrictions = new ComponentRestrictions { Country = new[] { "pl" } },
-
-        });
-
-        await this.autocomplete.SetFields(new[] { "address_components", "geometry", "name" });
-
-        await this.autocomplete.AddListener("place_changed", async () =>
-        {
-            var place = await this.autocomplete.GetPlace();
-            searchedPlace = place;
-            if (place?.Geometry == null)
-            {
-                this.message = "No results available for " + place?.Name;
-            }
-            else if (place.Geometry.Location != null)
-            {
-                await this.map1.InteropObject.SetCenter(place.Geometry.Location);
-                await this.map1.InteropObject.SetZoom(13);
-
-                this.message = "Displaying result for " + place.Name;
-            }
-            else if (place.Geometry.Viewport != null)
-            {
-                await this.map1.InteropObject.FitBounds(place.Geometry.Viewport, 5);
-                this.message = "Displaying result for " + place.Name;
-            }
-
-            this.StateHasChanged();
-        });
+        MapIsRendered = true;
+        this.StateHasChanged();
+        await autocompleteInput.InitAutocomplete();
     }
 
+
+    private void SetSearchedPlace(PlaceResult searchedPlace)
+    {
+        this.searchedPlace = searchedPlace;
+    }
 
 
     //directions
