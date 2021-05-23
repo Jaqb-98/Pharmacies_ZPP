@@ -26,5 +26,6 @@ namespace Pharmacies.Server.Data
         }
 
         public DbSet<PharmacyModel> Pharmacies { get; set; }
+        public DbSet<AreaModel> Areas { get; set; }
     }
 }
