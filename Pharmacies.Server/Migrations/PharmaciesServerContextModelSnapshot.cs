@@ -225,6 +225,25 @@ namespace Pharmacies.Server.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("Pharmacies.Server.Models.AreaModel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AreaName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BoundariesCoords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Areas");
+                });
+
             modelBuilder.Entity("Pharmacies.Server.Models.PharmacyModel", b =>
                 {
                     b.Property<string>("Id")
@@ -235,6 +254,18 @@ namespace Pharmacies.Server.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhotoReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Vicinity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("lat")
+                        .HasColumnType("real");
+
+                    b.Property<float>("lng")
+                        .HasColumnType("real");
 
                     b.HasKey("Id");
 
