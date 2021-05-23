@@ -1,0 +1,57 @@
+﻿@using Microsoft.AspNetCore.Components.Web.Virtualization
+@page "/areas"
+
+@attribute [Authorize(Roles = "Admin")]
+@inject IAreaService AreaService
+@inject NavigationManager NavigationManager
+
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        @{
+            int count = 1;
+        }
+        <div class="container">
+            <h3>Areas</h3>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-hover">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Area name</th>
+                            <th scope="col">Description</th>
+
+                        </tr>
+                        <Virtualize Context="area" ItemsProvider="@LoadAreas">
+                            <tr>
+                                <td>
+                                    @count
+                                    @{count++;}
+                                </td>
+                                <td>
+                                    @area.AreaName
+                                </td>
+                                <td>
+                                    @area.Description
+                                </td>
+                            </tr>
+                        </Virtualize>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </Authorized>
+    <NotAuthorized>
+        <p>Authorized access only!</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    public ICollection<AreaModel> Areas { get; set; } = new List<AreaModel>();
+
+    private async ValueTask<ItemsProviderResult<AreaModel>> LoadAreas(ItemsProviderRequest request)
+    {
+        Areas = await AreaService.GetAreas();
+        return new ItemsProviderResult<AreaModel>(Areas, Areas.Count());
+    }
+}
