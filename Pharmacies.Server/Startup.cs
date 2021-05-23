@@ -45,7 +45,8 @@ namespace Pharmacies.Server
             services.AddServerSideBlazor();
             services.AddAuthentication("Identity.Application").AddCookie();
             services.AddScoped<IPharmacyService, PharmacyService>();
-            services.AddScoped<IUsersService, UsersService>();
+            services.AddTransient<IUsersService, UsersService>();
+            services.AddTransient<IAreaService, AreaService>();
             services.AddSingleton(Configuration);
 
 
