@@ -3,6 +3,8 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 @inject IJSRuntime JSRuntime
+@inject IAreaService AdminService
+
 @attribute [Authorize(Roles = "Admin")]
 
 <AuthorizeView Roles="Admin">
@@ -17,18 +19,25 @@
                     </div>
                     <div class="row mt-2">
 
-                        <button @onclick="EndDrawingPolygon" class="btn btn-primary">End drawing area</button>
+                        <button @onclick="EndDrawingPolygon" class="btn btn-primary" disabled="@(polygon==null)">End drawing area</button>
                     </div>
                     <div class="row mt-2">
                         <button @onclick="ResetDrawing" class="btn btn-primary">Reset</button>
-
                     </div>
                     <div class="row mt-2">
                         <hr />
-                        <button @onclick="AddArea" class="btn btn-primary">Add area</button>
+                        <input @bind-value="_areaName" type="text" class="form-control" placeholder="Area name" aria-label="Area name" aria-describedby="basic-addon1">
                     </div>
+                    <div class="row mt-2">
+                        <textarea @bind="_description" class="form-control" aria-label="Description" placeholder="Description"></textarea>
+                    </div>
+                    <div class="row mt-2">
+                        <button @onclick="AddArea_Click" type="submit" class="btn btn-primary" disabled="@(_areaPolygon==null || String.IsNullOrEmpty(_areaName))">Add area</button>
+                    </div>
+
                 </div>
-                <div class="col-10">
+                <div class="col-1"></div>
+                <div class="col-9">
                     <div class="row">
                         <div class="input-group mb-3">
                             @if (MapIsRendered)
@@ -43,6 +52,7 @@
                 </div>
             </div>
         </div>
+        <Confirm @ref="CreateConfirmation" ConfirmationChanged="AddArea" ConfirmationTitle="Create confirmation" ConfirmationButton="Create" ConfirmationMessage="Are you sure you want to create this area?"></Confirm>
     </Authorized>
     <NotAuthorized>
 
@@ -58,8 +68,9 @@
     private List<Polyline> polylines = new List<Polyline>();
     private Polyline polyline;
 
-    private List<Polygon> polygons = new List<Polygon>();
+    //private List<Polygon> polygons = new List<Polygon>();
     private Polygon polygon;
+    private Polygon _areaPolygon;
 
     private AutocompleteInput autocompleteInput;
 
@@ -68,10 +79,16 @@
     private bool MapIsRendered = false;
 
 
+    private string _areaName;
+    private string _description;
+
+
     //geolocation
     private WindowNavigatorGeolocation geolocation;
     private GeolocationPosition geolocationPosition;
     private int zoom = 13;
+
+    protected ConfirmBase CreateConfirmation { get; set; }
 
 
     protected override async Task OnInitializedAsync()
@@ -144,39 +161,77 @@
         path.Clear();
     }
 
-    private async void EndDrawingPolygon()
+    private void EndDrawingPolygon()
     {
-        polygons.Add(polygon);
-
+        _areaPolygon = polygon;
         polygon = null;
         path.Clear();
+        this.StateHasChanged();
     }
 
     private void ResetDrawing()
     {
-        foreach (var polygon in polygons)
+        if (_areaPolygon != null)
         {
-            polygon.SetMap(null);
+            _areaPolygon.SetMap(null);
+            _areaPolygon = null;
         }
-        polygons.Clear();
-
-        if (polygon != null)
+        else if (polygon != null)
         {
             polygon.SetMap(null);
             polygon = null;
         }
     }
 
-    private void AddArea()
+    private async Task AddArea(bool confirmed)
     {
+        if (confirmed)
+        {
+            var coords = await _areaPolygon.GetPath();
 
+            var serializeString = JsonConvert.SerializeObject(coords);
+
+            var d = JsonConvert.DeserializeObject<IEnumerable<LatLngLiteral>>(serializeString);
+
+            var p = await Polygon.CreateAsync(map.JsRuntime, new PolygonOptions());
+            await p.SetPath(d);
+
+            var a = await p.GetPath();
+
+            var latlng = new LatLngLiteral() { Lat = 49.8505989, Lng = 19.0849449 };
+
+            //await JSRuntime.InvokeVoidAsync("initialize");
+           var isin =  await JSRuntime.InvokeAsync<bool>("IsInArea",latlng.Lat, latlng.Lng,d);
+
+
+            var newArea = new AreaModel
+            {
+                Id = Guid.NewGuid().ToString(),
+                AreaName = _areaName,
+                Description = _description,
+                BoundariesCoords = serializeString
+
+            };
+            await AdminService.AddNewArea(newArea);
+
+            ResetDrawing();
+            _areaName = String.Empty;
+            _description = String.Empty;
+
+        }
     }
 
 
     private async Task OnAfterMapInit()
     {
         MapIsRendered = true;
+        this.StateHasChanged();
         await map.InteropObject.AddListener<MouseEvent>("click", async (e) => await OnClick(e));
         await autocompleteInput.InitAutocomplete();
+    }
+
+    private void AddArea_Click()
+    {
+        CreateConfirmation.Show();
     }
 }
