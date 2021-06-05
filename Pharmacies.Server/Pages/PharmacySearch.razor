@@ -24,11 +24,15 @@
         </div>
         <div class="col">
             <div class="row">
+                <div class="col-sm-6">
 
-                <div class="col" id="select_range">
+                    <AreasAutocomplete SelectedArea="SearchSelectedArea"></AreasAutocomplete>
+
+                </div>
+
+                <div class="col-sm-3" id="select_range">
 
                     <select @bind="@_range" class="form-select" aria-label="Default select example">
-                        <option selected>Search range</option>
                         <option value="500">500m</option>
                         <option value="1000">1km</option>
                         <option value="2000">2km</option>
@@ -36,7 +40,7 @@
                     </select>
                 </div>
 
-                <div class="col" id="TravelMode">
+                <div class="col-sm-3" id="TravelMode">
                     <EditForm Model="travelMode">
 
                         <InputSelect @bind-Value="travelMode" class="form-select" aria-label="Default select example">
@@ -152,9 +156,13 @@
     private string ImageSrc;
 
 
+    private Polygon areaPolygon;
+
+
 
     private async Task SearchPharmacies()
     {
+        Reset();
         usersPharmacies = UsersService.GetPlacesInRange(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
         _pharmacies = await PharmacyService.SearchPharmacies(searchedPlace.Geometry.Location.Lat, searchedPlace.Geometry.Location.Lng, _range);
 
@@ -190,6 +198,7 @@
         await InvokeClustering(coords);
 
     }
+
 
     private async Task InvokeClustering(List<(LatLngLiteral, string)> coords)
     {
@@ -342,6 +351,70 @@
             _distanceTotalString += route.Distance.Text;
         }
     }
+
+
+    private async Task SearchSelectedArea(AreaModel area)
+    {
+        usersPharmacies = null;
+        areaPolygon = await Polygon.CreateAsync(map1.JsRuntime, new PolygonOptions() { Map = map1.InteropObject });
+        if (area != null)
+        {
+
+            var areaCoords = area.BoundariesCoords;
+            var deserializedCoords = JsonConvert.DeserializeObject<IEnumerable<LatLngLiteral>>(areaCoords);
+
+            await areaPolygon.SetPath(deserializedCoords);
+
+
+            var pharmacies = await PharmacyService.GetPharmaciesFromDB();
+            List<PharmacyModel> pharmaciesInArea = new List<PharmacyModel>();
+            foreach (var pharmacy in pharmacies)
+            {
+                if (await JSRuntime.InvokeAsync<bool>("IsInArea", pharmacy.lat, pharmacy.lng, deserializedCoords))
+                {
+                    pharmaciesInArea.Add(pharmacy);
+                }
+            }
+
+            usersPharmacies = pharmaciesInArea;
+
+            if (pharmaciesInArea.Count != 0)
+            {
+                await this.map1.InteropObject.SetZoom(10);
+                await this.map1.InteropObject.SetCenter(new LatLngLiteral { Lat = usersPharmacies[0].lat, Lng = usersPharmacies[0].lng });
+
+            }
+
+            if (_markerClustering != null)
+                await ClearClustering();
+
+            var coords = new List<(LatLngLiteral latlng, string name)>();
+
+            foreach (var pharmacy in usersPharmacies)
+            {
+                coords.Add((new LatLngLiteral { Lat = pharmacy.lat, Lng = pharmacy.lng }, pharmacy.Name));
+            }
+
+            if (coords.Count != 0)
+                await InvokeClustering(coords);
+        }
+        else
+        {
+            Reset();
+        }
+
+
+    }
+
+    private void Reset()
+    {
+        if (areaPolygon != null)
+            areaPolygon.SetMap(null);
+        usersPharmacies = null;
+        _pharmacies = null;
+        this.StateHasChanged();
+    }
+
 
 
 
