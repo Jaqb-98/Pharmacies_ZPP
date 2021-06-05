@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Pharmacies.Server.Data;
 using Pharmacies.Server.Interfaces;
 using Pharmacies.Server.Models;
 using System;
@@ -23,8 +25,11 @@ namespace Pharmacies.Server.Services
 
         private readonly string _apiKey;
 
-        public PharmacyService(IConfiguration configuration)
+        private PharmaciesServerContext _context;
+
+        public PharmacyService(IConfiguration configuration, PharmaciesServerContext context)
         {
+            _context = context;
             _configuration = configuration;
             _apiKey = _configuration.GetSection("Api").GetSection("ApiKey").Value;
         }
@@ -102,6 +107,12 @@ namespace Pharmacies.Server.Services
             var url = $"{baseUrl}{parameters}";
 
             return url;
+        }
+
+
+        public async Task<ICollection<PharmacyModel>> GetPharmaciesFromDB()
+        {
+            return await _context.Pharmacies.ToListAsync();
         }
     }
 }
