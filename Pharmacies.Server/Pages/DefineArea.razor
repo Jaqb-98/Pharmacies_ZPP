@@ -52,7 +52,11 @@
                 </div>
             </div>
         </div>
-        <Confirm @ref="CreateConfirmation" ConfirmationChanged="AddArea" ConfirmationTitle="Create confirmation" ConfirmationButton="Create" ConfirmationMessage="Are you sure you want to create this area?"></Confirm>
+        <Confirm @ref="CreateConfirmation" 
+                 ConfirmationChanged="AddArea" 
+                 ConfirmationTitle="Create confirmation"
+                 ConfirmationButton="Create" 
+                 ConfirmationMessage="Are you sure you want to create this area?"></Confirm>
     </Authorized>
     <NotAuthorized>
 
@@ -131,13 +135,11 @@
 
     private async Task OnClick(MouseEvent e)
     {
-        //Debug.WriteLine($"Onclick : {mouseEvent.LatLng}");
 
         path.Add(e.LatLng);
 
         if (polyline != null)
         {
-            //Debug.WriteLine($"Path length : {path.Count()}");
 
             await polyline.SetPath(path);
         }
@@ -190,18 +192,6 @@
             var coords = await _areaPolygon.GetPath();
 
             var serializeString = JsonConvert.SerializeObject(coords);
-
-            var d = JsonConvert.DeserializeObject<IEnumerable<LatLngLiteral>>(serializeString);
-
-            var p = await Polygon.CreateAsync(map.JsRuntime, new PolygonOptions());
-            await p.SetPath(d);
-
-            var a = await p.GetPath();
-
-            var latlng = new LatLngLiteral() { Lat = 49.8505989, Lng = 19.0849449 };
-
-            //await JSRuntime.InvokeVoidAsync("initialize");
-           var isin =  await JSRuntime.InvokeAsync<bool>("IsInArea",latlng.Lat, latlng.Lng,d);
 
 
             var newArea = new AreaModel
