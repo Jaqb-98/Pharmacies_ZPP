@@ -1,0 +1,44 @@
+﻿@using Blazored.Typeahead
+@inject IAreaService AreaService
+
+<BlazoredTypeahead SearchMethod="SearchAreas"
+                   TValue="AreaModel"
+                   TItem="AreaModel"
+                   Value="selectedArea"
+                   ValueChanged="ValueChanged"
+                   ValueExpression="@(()=>selectedArea)"
+                   placeholder="Search area">
+    <SelectedTemplate>
+        @context.AreaName
+    </SelectedTemplate>
+    <ResultTemplate>
+        @context.AreaName
+    </ResultTemplate>
+</BlazoredTypeahead>
+
+@code {
+
+
+    private AreaModel selectedArea;
+
+    [Parameter]
+    public EventCallback<AreaModel> SelectedArea { get; set; }
+
+    private List<AreaModel> areas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        areas = await AreaService.GetAreas();
+    }
+
+    private async Task<IEnumerable<AreaModel>> SearchAreas(string input)
+    {
+        return await Task.FromResult(areas.Where(x => x.AreaName.ToLower().Contains(input.ToLower())).ToList());
+    }
+
+    private async Task ValueChanged(AreaModel area)
+    {
+        selectedArea = area;
+        await SelectedArea.InvokeAsync(selectedArea);
+    }
+}
