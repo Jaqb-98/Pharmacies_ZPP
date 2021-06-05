@@ -42,5 +42,8 @@ namespace Pharmacies.Server.Interfaces
         string GetPhoto(string photoRef, int width, int height);
 
 
+        Task<ICollection<PharmacyModel>> GetPharmaciesFromDB();
+
+
     }
 }
