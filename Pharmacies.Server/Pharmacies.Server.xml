@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pharmacies.Server</name>
+    </assembly>
+    <members>
+        <member name="M:Pharmacies.Server.Interfaces.IPharmacyService.SearchPharmacies(System.Double,System.Double,System.Int32,System.String)">
+            <summary>
+            Returns places that are in range of given coordinates (GOOGLE API)
+            </summary>
+            <param name="lat"></param>
+            <param name="lng"></param>
+            <param name="range"></param>
+            <param name="type"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IPharmacyService.GetSearchedLocation(System.String)">
+            <summary>
+            Transforms given address to coordinates (GOOGLE API)
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IPharmacyService.GetPlaceDetails(System.String)">
+            <summary>
+            Returns details of the place with given id (GOOGLE API)
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IPharmacyService.GetPhoto(System.String,System.Int32,System.Int32)">
+            <summary>
+            Returns photo from given reference (GOOGLE API)
+            </summary>
+            <param name="photoRef"></param>
+            <param name="width"></param>
+            <param name="height"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.GetUsers">
+            <summary>
+            Returns all verified and unverified users
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.VerifyAccount(System.String)">
+            <summary>
+            Changes users role to VerifiedUser
+            </summary>
+            <param name="id">Users id</param>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.DemoteUser(System.String)">
+            <summary>
+            Changes users role to User
+            </summary>
+            <param name="id">Users id</param>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.GetUserRole(System.String)">
+            <summary>
+            Returns the role of the user with the given id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.GetUser(System.String)">
+            <summary>
+            Returns user with the given id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.DeleteUser(System.String)">
+            <summary>
+            Disactivates users account
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.GetRole(System.String)">
+            <summary>
+            Returns role with the given id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.AddPharmacy(System.String,Pharmacies.Server.Models.PharmacyModel)">
+            <summary>
+            Adds pharmacy to user with the given id
+            </summary>
+            <param name="id"></param>
+            <param name="pharmacy"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.GetUsersPharmacies(System.String)">
+            <summary>
+            Returns list of all pharmacies assigned to user with the given id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Pharmacies.Server.Interfaces.IUsersService.UploadImageOnServer(Microsoft.AspNetCore.Http.IFormFile)" -->
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.SavePharmacy(Pharmacies.Server.Models.PharmacyModel,System.String)">
+            <summary>
+            Adds new pharmacy object to user with the given id
+            </summary>
+            <param name="pharmacy"></param>
+            <param name="userId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Pharmacies.Server.Interfaces.IUsersService.GetPlacesInRange(System.Double,System.Double,System.Int32)">
+            <summary>
+            Returns all places that are in range of given coordinates
+            </summary>
+            <param name="lat">Latitude</param>
+            <param name="lng">Longtitude</param>
+            <param name="rangeInMeters">Search radius in meters</param>
+            <returns></returns>
+        </member>
+        <member name="T:Pharmacies.Server.Models.Rootobject">
+            <summary>
+            Object returned by searchnearbyplace api. Contains array of searched places.
+            </summary>
+        </member>
+        <member name="T:Pharmacies.Server.Services.PharmacyService">
+            <summary>
+            <inheritdoc/>
+            </summary>
+        </member>
+        <member name="T:Pharmacies.Server.Services.UsersService">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>
